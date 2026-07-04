@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GYMBRO - Product Reviews</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- FIREBASE SERVERLESS CONFIG & DB LAYERS -->
+    <script type="module" src="js/firebase-config.js"></script>
+    <script type="module" src="js/firebase-db.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #000;
+            color: #fff;
+            line-height: 1.6;
+        }
+
+        .wrap {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 110px 24px 24px; /* Increased top padding for navbar space */
+        }
+
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        p.sub {
+            color: #ccc;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 18px;
+            backdrop-filter: blur(10px);
+        }
+
+        .row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        label {
+            color: #ccc;
+            font-size: 0.95rem;
+        }
+
+        select,
+        input[type="number"],
+        input[type="text"],
+        textarea {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: #fff;
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-top: 8px;
+            outline: none;
+            font-family: inherit;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+        }
+
+        select {
+            /* helps some browsers keep a white background; force dark text */
+            background-color: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+
+        select option {
+            background: #111;
+            color: #fff;
+        }
+
+
+
+        textarea {
+            min-height: 170px;
+            /* increase height of review input */
+            resize: vertical;
+        }
+
+
+        .grid2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 800px) {
+            .grid2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .btn {
+            border: none;
+            padding: 12px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            background: #ff4757;
+            color: #fff;
+            transition: transform 0.15s ease, background 0.15s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            background: #ff3748;
+        }
+
+        .reviews-list {
+            margin-top: 18px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .review {
+            padding: 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .review-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .stars {
+            color: #ffd166;
+            font-size: 0.95rem;
+        }
+
+        .who {
+            color: #ccc;
+            font-size: 0.95rem;
+        }
+
+        .review p {
+            color: #eee;
+        }
+
+        .ts {
+            color: #777;
+            font-size: 0.9rem;
+            margin-top: 6px;
+        }
+
+        .empty {
+            color: #aaa;
+            font-style: italic;
+            padding: 18px 6px;
+        }
+
+        /* GYMBRO SCOPED NAVBAR COMPONENT */
+        .gymbro-navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1rem 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            z-index: 1200;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .gymbro-navbar__inner {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .gymbro-navbar__brand {
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+            color: #fff;
+            font-size: clamp(1.15rem, 2vw, 1.35rem);
+            font-weight: 800;
+            letter-spacing: 0.24em;
+            text-transform: uppercase;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        .gymbro-navbar__brand:hover {
+            opacity: 0.85;
+            transform: translateY(-1px);
+        }
+
+        .gymbro-navbar__brand img {
+            height: 40px;
+            width: auto;
+            display: block;
+            margin: 0;
+        }
+
+        .gymbro-navbar__toggle {
+            display: none;
+            width: 48px;
+            height: 48px;
+            margin-left: auto;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.04);
+            color: #fff;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            transition: background 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+        }
+
+        .gymbro-navbar__toggle:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.16);
+        }
+
+        .gymbro-navbar__toggle-line {
+            width: 18px;
+            height: 2px;
+            border-radius: 999px;
+            background: #fff;
+            transition: transform 0.28s ease, opacity 0.28s ease;
+        }
+
+        .gymbro-navbar__toggle.is-active .gymbro-navbar__toggle-line:nth-child(1) {
+            transform: translateY(7px) rotate(45deg);
+        }
+
+        .gymbro-navbar__toggle.is-active .gymbro-navbar__toggle-line:nth-child(2) {
+            opacity: 0;
+        }
+
+        .gymbro-navbar__toggle.is-active .gymbro-navbar__toggle-line:nth-child(3) {
+            transform: translateY(-7px) rotate(-45deg);
+        }
+
+        .gymbro-navbar__menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-left: auto;
+        }
+
+        .gymbro-navbar__link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.7rem 0.95rem;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: #fff;
+            font: inherit;
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease, transform 0.25s ease;
+        }
+
+        .gymbro-navbar__link:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.12);
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 255, 255, 0.15);
+        }
+
+        .gymbro-navbar__link--cta {
+            border-color: rgba(255, 255, 255, 0.12);
+            background: linear-gradient(135deg, #ff4757 0%, #ff6b81 100%);
+            box-shadow: 0 12px 30px rgba(255, 71, 87, 0.28);
+        }
+
+        .gymbro-navbar__link--active {
+            border-color: rgba(255, 71, 87, 0.4);
+            color: #ff4757;
+            font-weight: 600;
+        }
+
+        @keyframes gymbroNavFade {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            body.gymbro-menu-open {
+                overflow: hidden;
+            }
+
+            .gymbro-navbar__toggle {
+                display: inline-flex;
+            }
+
+            .gymbro-navbar__menu {
+                position: absolute;
+                top: calc(100% + 12px);
+                left: 0;
+                right: 0;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.45rem;
+                padding: 0.85rem;
+                background: rgba(10, 10, 10, 0.96);
+                backdrop-filter: blur(18px);
+                -webkit-backdrop-filter: blur(18px);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 18px;
+                box-shadow: 0 16px 40px rgba(0, 0, 0, 0.32);
+                opacity: 0;
+                visibility: hidden;
+                pointer-events: none;
+                transform: translateY(-12px);
+                transition: opacity 0.28s ease, transform 0.28s ease, visibility 0.28s ease;
+            }
+
+            .gymbro-navbar__menu.is-open {
+                opacity: 1;
+                visibility: visible;
+                pointer-events: auto;
+                transform: translateY(0);
+                animation: gymbroNavFade 0.28s ease;
+            }
+
+            .gymbro-navbar__link {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar gymbro-navbar" aria-label="Primary">
+        <div class="nav-container gymbro-navbar__inner">
+            <a href="index.html" class="nav-logo gymbro-navbar__brand" onclick="closeGymbroMenu(); return true;">
+                <img src="images/gymbro.png" alt="GymBro Logo">
+            </a>
+
+            <button class="gymbro-navbar__toggle" type="button" id="gymbroNavToggle" aria-controls="gymbroNavMenu"
+                aria-expanded="false" aria-label="Toggle navigation">
+                <span class="gymbro-navbar__toggle-line"></span>
+                <span class="gymbro-navbar__toggle-line"></span>
+                <span class="gymbro-navbar__toggle-line"></span>
+            </button>
+
+            <div class="gymbro-navbar__menu" id="gymbroNavMenu">
+                <a href="index.html" class="gymbro-navbar__link">Home</a>
+                <a href="index.html#products" class="gymbro-navbar__link">Shop</a>
+                <a href="index.html#collections" class="gymbro-navbar__link">Collections</a>
+                <a href="index.html#products" class="gymbro-navbar__link">Products</a>
+                <a href="reviews.html" class="gymbro-navbar__link gymbro-navbar__link--active">Reviews</a>
+                <a href="https://wa.me/918978422691" class="gymbro-navbar__link gymbro-navbar__link--cta"
+                    target="_blank" rel="noopener noreferrer">Contact Us</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="wrap">
+        <h1>Write a Review</h1>
+        <p class="sub">Rate the products and leave a short review.</p>
+
+        <div class="card">
+            <form id="reviewForm">
+                <div class="grid2">
+                    <div>
+                        <label for="productSelect">Product</label>
+                        <input
+                            type="text"
+                            id="productSelect"
+                            placeholder="e.g., Gym Bro Hoodie"
+                            required
+                            autocomplete="off"
+                        />
+                    </div>
+
+                    <div>
+                        <label for="rating">Rating (1-5)</label>
+                        <input type="number" id="rating" min="1" max="5" step="1" value="5" required />
+                    </div>
+                </div>
+
+                <div style="margin-top: 14px;">
+                    <label for="customerName">Your name</label>
+                    <input type="text" id="customerName" placeholder="e.g., Alex" required />
+                </div>
+
+                <div style="margin-top: 14px;">
+                    <label for="reviewText">Write your review</label>
+                    <textarea id="reviewText" placeholder="What did you like?" required></textarea>
+                </div>
+
+                <div class="row" style="margin-top: 14px;">
+                    <button class="btn" type="submit">Submit Review</button>
+                    <button class="btn" type="button" style="background:#222;border:1px solid rgba(255,255,255,0.15)"
+                        onclick="loadReviews()">
+                        Refresh List
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card" style="margin-top: 18px;">
+            <div class="row" style="justify-content: space-between;">
+                <div>
+                    <h2 style="font-size:1.4rem; margin-bottom: 6px;">Recent Reviews</h2>
+                    <p class="sub" style="margin:0;">Reviews are grouped by product.</p>
+                </div>
+            </div>
+
+            <div id="reviewsList" class="reviews-list"></div>
+        </div>
+    </div>
+
+    <script>
+
+
+        function escapeHtml(str) {
+            return String(str)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        function starsHtml(rating) {
+            const r = Math.max(0, Math.min(5, Number(rating) || 0));
+            const full = '★'.repeat(r);
+            const empty = '☆'.repeat(5 - r);
+            return full + empty;
+        }
+
+        async function loadReviews() {
+            // Wait if Firebase DB modules are not loaded yet
+            if (typeof window.dbGetReviews !== 'function') {
+                setTimeout(loadReviews, 50);
+                return;
+            }
+
+            const list = document.getElementById('reviewsList');
+            let reviews = [];
+            try {
+                reviews = await window.dbGetReviews();
+            } catch (err) {
+                console.error("loadReviews error:", err);
+                list.innerHTML = '<div class="empty" style="color:#ff4757;">Failed to load reviews from database.</div>';
+                return;
+            }
+
+            if (!reviews || !reviews.length) {
+                list.innerHTML = '<div class="empty">No reviews yet. Be the first!</div>';
+                return;
+            }
+
+            // Group by product
+            const byProduct = reviews.reduce((acc, rv) => {
+                const key = rv.product || 'Unknown';
+                acc[key] = acc[key] || [];
+                acc[key].push(rv);
+                return acc;
+            }, {});
+
+            const productNames = Object.keys(byProduct).sort();
+
+            list.innerHTML = productNames.map(product => {
+                const group = byProduct[product].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                const avg = group.reduce((s, x) => s + (Number(x.rating) || 0), 0) / group.length;
+                const avgRounded = Math.round(avg * 10) / 10;
+
+                return `
+          <div class="review" style="background: rgba(255,71,87,0.06); border-color: rgba(255,71,87,0.25);">
+            <div class="review-head">
+              <div>
+                <div style="font-weight:800;">${escapeHtml(product)}</div>
+                <div class="who">Average: ${avgRounded} / 5</div>
+              </div>
+              <div class="stars" title="Average rating">${starsHtml(Math.round(avg))}</div>
+            </div>
+
+            <div class="reviews-list" style="margin-top: 10px;">
+              ${group.slice(0, 5).map(rv => {
+                    return `
+                  <div class="review" style="margin: 8px 0; background: rgba(255,255,255,0.02)">
+                    <div class="review-head">
+                      <div class="who">${escapeHtml(rv.name || 'Customer')}</div>
+                      <div class="stars">${starsHtml(rv.rating)}</div>
+                    </div>
+                    <p>${escapeHtml(rv.text || '')}</p>
+                    <div class="ts">${new Date(rv.createdAt).toLocaleString('en-IN')}</div>
+
+                  </div>
+
+                `;
+                }).join('')}
+            </div>
+          </div>
+        `;
+            }).join('');
+        }
+
+        document.getElementById('reviewForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const product = document.getElementById('productSelect').value.trim();
+            const rating = Number(document.getElementById('rating').value);
+            const name = document.getElementById('customerName').value.trim();
+            const text = document.getElementById('reviewText').value.trim();
+
+            if (!product || !name || !text) return;
+            if (!(rating >= 1 && rating <= 5)) {
+                alert('Rating must be between 1 and 5');
+                return;
+            }
+
+            // Check if Firebase DB wrapper is loaded
+            if (typeof window.dbAddReview !== 'function') {
+                alert('Database is still initializing. Please try again in a moment.');
+                return;
+            }
+
+            try {
+                await window.dbAddReview({
+                    product,
+                    rating,
+                    name,
+                    text
+                });
+
+                e.target.reset();
+                document.getElementById('rating').value = 5;
+                loadReviews();
+                alert('Review submitted!');
+            } catch (err) {
+                console.error("Submit review error:", err);
+                alert("Failed to submit review.");
+            }
+        });
+
+        // Hamburger navbar menu functionality
+        function toggleGymbroMenu() {
+            const menu = document.getElementById('gymbroNavMenu');
+            const toggle = document.getElementById('gymbroNavToggle');
+            if (!menu || !toggle) return;
+
+            const isOpen = menu.classList.toggle('is-open');
+            document.body.classList.toggle('gymbro-menu-open', isOpen);
+            toggle.setAttribute('aria-expanded', isOpen);
+            toggle.classList.toggle('is-active', isOpen);
+        }
+
+        function closeGymbroMenu() {
+            const menu = document.getElementById('gymbroNavMenu');
+            const toggle = document.getElementById('gymbroNavToggle');
+            if (!menu || !toggle) return;
+
+            menu.classList.remove('is-open');
+            document.body.classList.remove('gymbro-menu-open');
+            toggle.setAttribute('aria-expanded', 'false');
+            toggle.classList.remove('is-active');
+        }
+
+        document.getElementById('gymbroNavToggle').addEventListener('click', toggleGymbroMenu);
+
+        // initial load
+        loadReviews();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,2343 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GYMBRO Admin - Orders Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- FIREBASE SERVERLESS CONFIG & DB LAYERS -->
+    <script type="module" src="js/firebase-config.js"></script>
+    <script type="module" src="js/firebase-db.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #000;
+            color: #fff;
+            line-height: 1.6;
+        }
+
+        .navbar {
+            position: sticky;
+            top: 0;
+            background: rgba(0, 0, 0, 0.95);
+            padding: 1rem 2rem;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .logout-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #000 0%, #111 100%);
+        }
+
+        .login-form {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            min-width: 300px;
+        }
+
+        .login-form h2 {
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .dashboard {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #ff4757;
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .orders-table {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        table {
+            width: max-content;
+            min-width: 2200px;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            white-space: nowrap;
+        }
+
+
+        th,
+        td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th {
+            background: rgba(255, 71, 87, 0.2);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
+        .status-pending {
+            color: #ffaa00;
+            font-weight: 600;
+        }
+
+        .status-shipped {
+            color: #00ff88;
+            font-weight: 600;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: #ff4757;
+            cursor: pointer;
+            font-size: 1.2rem;
+            margin-right: 0.5rem;
+        }
+
+        .delete-btn {
+            color: #ff4757;
+            opacity: 0.95;
+        }
+
+        .delete-btn:hover {
+            color: #ff2f2f;
+            transform: translateY(-1px);
+        }
+
+        .download-single-btn {
+            color: #00ff88;
+            opacity: 0.95;
+            transition: all 0.2s;
+        }
+
+        .download-single-btn:hover {
+            color: #00dd77;
+            transform: translateY(-1px);
+        }
+
+        .no-orders {
+            text-align: center;
+            padding: 3rem;
+            color: #ccc;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                padding: 1rem;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.9rem;
+            }
+
+            th,
+            td {
+                padding: 0.75rem 0.5rem;
+            }
+        }
+
+        /* Style all select dropdowns */
+        select {
+            width: 100%;
+            padding: 0.75rem 2.5rem 0.75rem 0.75rem;
+            background-color: #111;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.1em;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.95rem;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        select:hover {
+            border-color: rgba(255, 71, 87, 0.5);
+            background-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 10px rgba(255, 71, 87, 0.15);
+        }
+
+        select:focus {
+            border-color: #ff4757;
+            box-shadow: 0 0 12px rgba(255, 71, 87, 0.3);
+        }
+
+        select option {
+            background-color: #111;
+            color: #fff;
+            font-family: 'Poppins', sans-serif;
+            padding: 10px;
+        }
+
+        select option:checked,
+        select option:hover {
+            background-color: #ff4757 !important;
+            color: #fff !important;
+        }
+
+        /* Status dropdown specific styles in table */
+        .status-dropdown {
+            width: auto;
+            padding: 0.5rem 1.8rem 0.5rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            background-position: right 0.5rem center;
+            background-size: 0.9em;
+        }
+
+        /* Re-style dashboard for flex sidebar layout */
+        #dashboard.dashboard-sidebar-layout {
+            display: none;
+            height: 100vh;
+            overflow: hidden;
+            padding: 0;
+            margin: 0;
+            max-width: 100%;
+        }
+        #dashboard.dashboard-sidebar-layout.logged-in {
+            display: flex !important;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 280px;
+            background: #0a0a0a;
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            height: 100%;
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            overflow-y: auto;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0.85rem 1rem;
+            color: #aaa;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .menu-item i {
+            font-size: 1.1rem;
+            width: 22px;
+            text-align: center;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 71, 87, 0.08);
+            color: #ff4757 !important;
+        }
+
+        .menu-item.active {
+            background: #ff4757;
+            color: #fff !important;
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.35);
+        }
+
+        /* Main Content Container */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+            background: #000;
+        }
+
+        .dashboard-section {
+            animation: fadeInSection 0.3s ease;
+        }
+
+        @keyframes fadeInSection {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            #dashboard.dashboard-sidebar-layout.logged-in {
+                flex-direction: column !important;
+            }
+
+            .sidebar {
+                width: 100% !important;
+                height: auto !important;
+                border-right: none !important;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            }
+
+            .sidebar-menu {
+                flex-direction: row !important;
+                padding: 0.75rem 1rem !important;
+                gap: 0.25rem !important;
+                overflow-x: auto;
+                scrollbar-width: none;
+            }
+
+            .sidebar-menu::-webkit-scrollbar {
+                display: none;
+            }
+
+            .menu-item {
+                padding: 0.6rem 0.85rem !important;
+                font-size: 0.85rem;
+                white-space: nowrap;
+                border-radius: 8px !important;
+            }
+
+            .sidebar-logo-section {
+                display: none !important;
+            }
+
+            .sidebar-footer {
+                padding: 0.5rem 1rem !important;
+                border-top: none !important;
+            }
+
+            .sidebar-footer .logout-btn {
+                padding: 0.5rem 1rem !important;
+                font-size: 0.85rem;
+                border-radius: 8px !important;
+            }
+
+            .main-content {
+                padding: 1rem !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar" id="adminNav" style="display: none !important;"></nav>
+
+    <div class="login-container" id="loginContainer">
+        <form class="login-form" onsubmit="login(); return false;">
+            <img src="images/gymbro.png" alt="GymBro" style="height: 48px; width: auto; margin-bottom: 1rem;">
+            <h2><i class="fas fa-lock"></i> Admin Login</h2>
+            <input type="email" id="adminEmail" class="login-input" placeholder="Admin Email" required style="margin-bottom: 1rem;">
+            <input type="password" id="adminPassword" class="login-input" placeholder="Password" required maxlength="50" style="margin-bottom: 1rem;">
+            <button type="submit" class="login-btn" id="loginBtn">Login</button>
+            <a href="index.html" style="display: inline-block; margin-top: 1.5rem; color: #ff4757; text-decoration: none; font-weight: 600; font-size: 0.95rem;"><i class="fas fa-arrow-left" style="margin-right: 8px;"></i>Back to Store</a>
+        </form>
+    </div>
+
+    <div class="dashboard dashboard-sidebar-layout" id="dashboard" style="display: none;">
+        <!-- Left Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="sidebar-logo-section" style="padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 10px;">
+                <img src="images/gymbro.png" alt="GymBro Logo" style="height: 32px; width: auto;">
+                <div style="font-size: 1.15rem; font-weight: 800; letter-spacing: 1px; color: #fff;">GYMBRO <span style="color: #ff4757; font-weight: 600; font-size: 0.85rem;">admin</span></div>
+            </div>
+            <div class="sidebar-menu">
+                <a href="#" id="menuBtnOrders" onclick="showDashboardSection('orders')" class="menu-item active">
+                    <i class="fas fa-shopping-cart"></i>Orders Dashboard
+                </a>
+                <a href="#" id="menuBtnProducts" onclick="showDashboardSection('products')" class="menu-item">
+                    <i class="fas fa-box"></i>Product Management
+                </a>
+                <a href="#" id="menuBtnCollections" onclick="showDashboardSection('collections')" class="menu-item">
+                    <i class="fas fa-folder"></i>Collections Management
+                </a>
+                <a href="#" id="menuBtnSubscribers" onclick="showDashboardSection('subscribers')" class="menu-item">
+                    <i class="fas fa-users"></i>Bro Squad Subscribers
+                </a>
+                <a href="#" id="menuBtnReviews" onclick="showDashboardSection('reviews')" class="menu-item">
+                    <i class="fas fa-star"></i>Reviews Management
+                </a>
+            </div>
+            <div class="sidebar-footer" style="padding: 1.5rem; border-top: 1px solid rgba(255,255,255,0.08);">
+                <button class="logout-btn" onclick="logout()" style="width: 100%; border-radius: 12px; padding: 0.8rem; background: #ff4757; color: white; border: none; cursor: pointer; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; transition: background 0.2s;"><i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i>Logout</button>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Section 1: Orders Dashboard -->
+            <div id="sectionOrders" class="dashboard-section">
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalOrders">0</div>
+                        <div>Total Orders</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="pendingOrders">0</div>
+                        <div>Pending</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="processingOrders">0</div>
+                        <div>Processing</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="shippedOrders">0</div>
+                        <div>Shipped</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="deliveredOrders">0</div>
+                        <div>Delivered</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalRevenue">₹0</div>
+                        <div>Total Revenue</div>
+                    </div>
+                </div>
+
+                <div style="display:flex; align-items:center; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap;">
+                    <div style="color:#ccc; font-size: 0.95rem;">
+                        Orders are stored in <strong style="color: #ff4757;">Firebase Firestore</strong>.
+                        <button class="login-btn" style="width:auto; display:inline-block; margin-left: 15px; padding: 0.4rem 0.8rem; font-size: 0.8rem; border-radius: 8px; background: #222; border: 1px solid #333;" onclick="seedCatalog()">
+                            <i class="fas fa-database" style="margin-right: 5px;"></i>Seed Catalog to Firestore
+                        </button>
+                    </div>
+
+                    <button class="login-btn" style="width:auto; padding: 0.75rem 1.25rem; border-radius: 12px;"
+                        onclick="downloadOrdersCSV()">
+                        <i class="fas fa-download" style="margin-right: 8px;"></i>Download Orders (CSV)
+                    </button>
+                </div>
+
+                <!-- Orders Search & Date Filter -->
+                <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:14px;">
+                    <div style="position:relative; flex:1; min-width:220px;">
+                        <i class="fas fa-search" style="position:absolute;left:0.9rem;top:50%;transform:translateY(-50%);color:#666;"></i>
+                        <input type="text" id="orderSearchInput" oninput="onOrderFilterChange()" placeholder="Search by Order ID, Name, or Mobile..."
+                            style="width:100%;padding:0.7rem 0.9rem 0.7rem 2.4rem;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:10px;color:#fff;font-family:inherit;font-size:0.88rem;">
+                    </div>
+                    <input type="date" id="orderDateFrom" onchange="onOrderFilterChange()" title="From date"
+                        style="padding:0.65rem 0.8rem;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:10px;color:#fff;font-family:inherit;font-size:0.86rem;">
+                    <span style="color:#666;font-size:0.85rem;">to</span>
+                    <input type="date" id="orderDateTo" onchange="onOrderFilterChange()" title="To date"
+                        style="padding:0.65rem 0.8rem;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:10px;color:#fff;font-family:inherit;font-size:0.86rem;">
+                    <button onclick="clearOrderFilters()" style="padding:0.65rem 1rem;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.14);color:#ccc;border-radius:10px;cursor:pointer;font-size:0.84rem;font-family:inherit;white-space:nowrap;">Clear</button>
+                </div>
+
+                <div class="table-container">
+                    <div class="orders-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Customer</th>
+                                    <th>Email</th>
+                                    <th>Mobile</th>
+                                    <th>House No</th>
+                                    <th>Street</th>
+                                    <th>City</th>
+                                    <th>State</th>
+                                    <th>Pincode</th>
+                                    <th>Items</th>
+                                    <th>Total</th>
+                                    <th>Payment</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordersTable">
+                                <tr>
+                                    <td colspan="16" class="no-orders">No orders yet. Complete a checkout on main site to see
+                                        orders
+                                        here.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Orders Pagination -->
+                <div id="ordersPagination" style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:16px;flex-wrap:wrap;">
+                    <button id="ordersPrevBtn" onclick="ordersChangePage(-1)" disabled
+                        style="padding:0.6rem 1.2rem;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);color:#fff;border-radius:10px;cursor:pointer;font-family:inherit;font-size:0.88rem;transition:all 0.2s;">
+                        <i class="fas fa-chevron-left" style="margin-right:6px;"></i>Prev
+                    </button>
+                    <span id="ordersPageInfo" style="color:#aaa;font-size:0.88rem;">Page 1 of 1</span>
+                    <button id="ordersNextBtn" onclick="ordersChangePage(1)" disabled
+                        style="padding:0.6rem 1.2rem;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);color:#fff;border-radius:10px;cursor:pointer;font-family:inherit;font-size:0.88rem;transition:all 0.2s;">
+                        Next<i class="fas fa-chevron-right" style="margin-left:6px;"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Section 2: Product Management -->
+            <div id="sectionProducts" class="dashboard-section" style="display: none;">
+                <h2 style="margin-bottom: 1.5rem; font-size: 1.6rem;"><i class="fas fa-box" style="color: #ff4757; margin-right: 10px;"></i>Product Management</h2>
+
+                <!-- Add Product Form -->
+                <div style="background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border-radius: 18px; border: 1px solid rgba(255,255,255,0.1); padding: 1.5rem; margin-bottom: 2rem;">
+                    <h3 id="productFormTitle" style="margin-bottom: 1rem; font-size: 1.1rem; color: #ccc;"><i class="fas fa-plus-circle" style="color: #ff4757; margin-right: 8px;"></i>Add New Product</h3>
+                    <form id="addProductForm" onsubmit="handleAddProduct(event)">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+                            <div>
+                                <label style="color: #aaa; font-size: 0.85rem; display: block; margin-bottom: 4px;">Product Name *</label>
+                                <input type="text" id="prodName" required placeholder="e.g., Power Grip Gloves"
+                                    style="width:100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; font-family: inherit; font-size: 0.95rem;">
+                            </div>
+                            <div>
+                                <label style="color: #aaa; font-size: 0.85rem; display: block; margin-bottom: 4px;">Category *</label>
+                                <select id="prodCategory" required onchange="handleCategoryChange(this.value)">
+                                    <option value="" disabled selected>Select category</option>
+                                    <option value="hoodies">Hoodies</option>
+                                    <option value="oversized">Oversized Tees</option>
+                                    <option value="trackpants">Track Pants</option>
+                                    <option value="accessories">Accessories</option>
+                                    <option value="__custom__">+ Add Custom Category...</option>
+                                </select>
+                                <div id="customCategoryContainer" style="display: none; margin-top: 8px;">
+                                    <input type="text" id="customCategoryInput" placeholder="Type custom category name..."
+                                        style="width:100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; font-family: inherit; font-size: 0.95rem;">
+                                </div>
+                            </div>
+                            <div>
+                                <label style="color: #aaa; font-size: 0.85rem; display: block; margin-bottom: 4px;">Price (₹) *</label>
+                                <input type="number" id="prodPrice" required min="1" placeholder="e.g., 2499"
+                                    style="width:100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; font-family: inherit; font-size: 0.95rem;">
+                            </div>
+                            <div>
+                                <label style="color: #aaa; font-size: 0.85rem; display: block; margin-bottom: 4px;">Stock Quantity *</label>
+                                <input type="number" id="prodStock" required min="0" value="50" placeholder="e.g., 50"
+                                    style="width:100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; font-family: inherit; font-size: 0.95rem;">
+                            </div>
+                        </div>
+                        <div style="margin-top: 1rem;">
+                            <label style="color: #aaa; font-size: 0.85rem; display: block; margin-bottom: 6px;">Image URL, Path, or Upload *</label>
+                            <!-- Upload button (hidden real input) -->
+                            <div style="display:flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                <input type="text" id="prodImage" required placeholder="https://example.com/image.jpg  OR  images/product.webp"
+                                    style="flex:1; min-width:200px; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; font-family: inherit; font-size: 0.95rem;">
+                                <label for="prodImageFileInput" title="Upload image from your device"
+                                    style="display:inline-flex; align-items:center; gap:6px; padding: 0.75rem 1rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; color: #fff; font-size: 0.85rem; font-family: inherit; cursor: pointer; white-space: nowrap; transition: background 0.2s;"
+                                    onmouseover="this.style.background='rgba(255,71,87,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+                                    <i class="fas fa-upload" style="color:#ff4757;"></i> Upload File
+                                </label>
+                                <input type="file" id="prodImageFileInput" accept="image/*" style="display:none;"
+                                    onchange="handleProdImageUpload(this)">
+                            </div>
+                            <p style="color:#666; font-size:0.75rem; margin-top:5px;">Tip: Upload a file from your device, or paste any image URL / relative path.</p>
+                        </div>
+
+                        <!-- Image Preview -->
+                        <div id="prodImagePreview" style="margin-top: 1rem; display: none;">
+                            <p style="color: #aaa; font-size: 0.85rem; margin-bottom: 6px;">Image Preview:</p>
+                            <img id="prodImagePreviewImg" src="" alt="Preview"
+                                style="max-width: 180px; max-height: 180px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.15); object-fit: cover;">
+                        </div>
+
+                        <!-- Description -->
+                        <div style="margin-top: 1rem;">
+                            <label style="color: #aaa; font-size: 0.85rem; display: block; margin-bottom: 4px;">Description</label>
+                            <textarea id="prodDescription" rows="2" placeholder="Short product description..."
+                                style="width:100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; font-family: inherit; font-size: 0.95rem; resize: vertical;"></textarea>
+                        </div>
+
+                        <button type="submit" id="addProductBtn"
+                            style="margin-top: 1.2rem; padding: 0.85rem 2rem; background: #ff4757; color: #fff; border: none; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.25s ease;">
+                            <i class="fas fa-plus" style="margin-right: 8px;"></i>Add Product
+                        </button>
+                        <button type="button" id="cancelEditBtn" onclick="cancelEdit()"
+                            style="display: none; margin-top: 1.2rem; margin-left: 10px; padding: 0.85rem 2rem; background: rgba(255,255,255,0.1); color: #ccc; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; font-weight: 600; font-size: 1rem; cursor: pointer;">
+                            <i class="fas fa-times" style="margin-right: 8px;"></i>Cancel
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Product List -->
+                <div style="background: rgba(255,255,255,0.03); backdrop-filter: blur(20px); border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); overflow: hidden;">
+                    <div style="padding: 1rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="font-size: 1.05rem; color: #ccc;"><i class="fas fa-list" style="color: #ff4757; margin-right: 8px;"></i>Current Products</h3>
+                        <button onclick="loadProductList()" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 0.5rem 1rem; border-radius: 10px; cursor: pointer; font-size: 0.85rem; font-family: inherit;">
+                            <i class="fas fa-sync-alt" style="margin-right: 6px;"></i>Refresh
+                        </button>
+                    </div>
+                    <div id="productListContainer" style="padding: 1rem; max-height: 500px; overflow-y: auto;">
+                        <p style="text-align: center; color: #666; padding: 2rem;">Loading products...</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Section 3: Bro Squad Subscribers -->
+            <div id="sectionSubscribers" class="dashboard-section" style="display: none;">
+                <h2 style="margin-bottom: 1.5rem; font-size: 1.6rem;"><i class="fas fa-users" style="color: #ff4757; margin-right: 10px;"></i>Bro Squad Subscribers</h2>
+                
+                <!-- Subscribers Stats Grid -->
+                <div class="stats" style="margin-bottom: 2rem;">
+                    <div class="stat-card" style="max-width: 320px;">
+                        <div class="stat-number" id="totalSubscribers">0</div>
+                        <div>Total Subscribers</div>
+                    </div>
+                </div>
+
+                <div style="display:flex; align-items:center; justify-content: space-between; gap: 12px; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                    <!-- Search Input -->
+                    <div style="flex: 1; min-width: 280px; position: relative;">
+                        <input type="text" id="subSearchInput" oninput="onSubSearchChange()" placeholder="Search subscribers by email..."
+                            style="width: 100%; padding: 0.75rem 1rem 0.75rem 2.5rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; font-family: inherit; font-size: 0.95rem;">
+                        <i class="fas fa-search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #666;"></i>
+                    </div>
+
+                    <button class="login-btn" id="exportSubscribersBtn" style="width:auto; padding: 0.75rem 1.25rem; border-radius: 12px;" onclick="downloadSubscribersCSV()">
+                        <i class="fas fa-download" style="margin-right: 8px;"></i>Export to CSV
+                    </button>
+                </div>
+
+                <!-- Subscribers Table -->
+                <div class="table-container">
+                    <div class="orders-table">
+                        <table style="min-width: 1000px;">
+                            <thead>
+                                <tr>
+                                    <th>Subscriber Email</th>
+                                    <th>Subscription Date</th>
+                                    <th>Source</th>
+                                    <th>Status</th>
+                                    <th style="width: 100px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="subscribersTable">
+                                <tr>
+                                    <td colspan="5" class="no-orders">Loading subscribers...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subscribers Pagination -->
+            <div id="subsPagination" style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:16px;flex-wrap:wrap;">
+                <button id="subsPrevBtn" onclick="subsChangePage(-1)" disabled
+                    style="padding:0.6rem 1.2rem;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);color:#fff;border-radius:10px;cursor:pointer;font-family:inherit;font-size:0.88rem;transition:all 0.2s;">
+                    <i class="fas fa-chevron-left" style="margin-right:6px;"></i>Prev
+                </button>
+                <span id="subsPageInfo" style="color:#aaa;font-size:0.88rem;">Page 1 of 1</span>
+                <button id="subsNextBtn" onclick="subsChangePage(1)" disabled
+                    style="padding:0.6rem 1.2rem;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);color:#fff;border-radius:10px;cursor:pointer;font-family:inherit;font-size:0.88rem;transition:all 0.2s;">
+                    Next<i class="fas fa-chevron-right" style="margin-left:6px;"></i>
+                </button>
+            </div>
+
+            <!-- Section 5: Collections Management -->
+            <div id="sectionCollections" class="dashboard-section" style="display: none;">
+                <h2 style="margin-bottom: 1.5rem; font-size: 1.6rem;"><i class="fas fa-folder" style="color: #ff4757; margin-right: 10px;"></i>Collections Management</h2>
+                
+                <!-- Add/Edit Collection Form -->
+                <div id="collectionFormContainer" style="background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border-radius: 18px; border: 1px solid rgba(255,255,255,0.1); padding: 1.5rem; margin-bottom: 2rem;">
+                    <h3 id="collectionFormTitle" style="margin-bottom: 1rem; font-size: 1.1rem; color: #ccc;"><i class="fas fa-plus-circle" style="color: #ff4757; margin-right: 8px;"></i>Add New Collection</h3>
+                    <form id="collectionForm" onsubmit="handleSaveCollection(event)">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                            <div>
+                                <label style="color: #aaa; font-size: 0.85rem; display: block; margin-bottom: 4px;">Collection Name *</label>
+                                <input type="text" id="colName" required placeholder="e.g. Hoodies..."
+                                    style="width:100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; font-family: inherit; font-size: 0.95rem;">
+                            </div>
+                            <div>
+                                <label style="color: #aaa; font-size: 0.85rem; display: block; margin-bottom: 6px;">Image URL, Path, or Upload *</label>
+                                <div style="display:flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                    <input type="text" id="colImage" required placeholder="https://example.com/image.jpg  OR  images/hoodie.webp"
+                                        oninput="handleColImagePreview(this.value)"
+                                        style="flex:1; min-width:200px; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; font-family: inherit; font-size: 0.95rem;">
+                                    <label for="colImageFileInput" title="Upload image from your device"
+                                        style="display:inline-flex; align-items:center; gap:6px; padding: 0.75rem 1rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; color: #fff; font-size: 0.85rem; font-family: inherit; cursor: pointer; white-space: nowrap; transition: background 0.2s;"
+                                        onmouseover="this.style.background='rgba(255,71,87,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+                                        <i class="fas fa-upload" style="color:#ff4757;"></i> Upload File
+                                    </label>
+                                    <input type="file" id="colImageFileInput" accept="image/*" style="display:none;"
+                                        onchange="handleColImageUpload(this)">
+                                </div>
+                                <p style="color:#666; font-size:0.75rem; margin-top:5px;">Tip: Upload a file from your device, or paste any image URL / relative path.</p>
+                                <!-- Collection Image Preview -->
+                                <div id="colImagePreview" style="margin-top: 0.8rem; display: none;">
+                                    <p style="color: #aaa; font-size: 0.82rem; margin-bottom: 5px;">Preview:</p>
+                                    <img id="colImagePreviewImg" src="" alt="Preview"
+                                        style="width:80px; height:80px; border-radius:50%; object-fit:cover; border: 2px solid rgba(255,71,87,0.4);">
+                                </div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 1.5rem; display: flex; gap: 10px;">
+                            <button type="submit" class="login-btn" id="saveCollectionBtn" style="width: auto; padding: 0.7rem 1.5rem; border-radius: 10px;">
+                                <i class="fas fa-save" style="margin-right: 8px;"></i>Save Collection
+                            </button>
+                            <button type="button" class="login-btn" id="cancelColEditBtn" onclick="cancelCollectionEdit()" style="display: none; width: auto; padding: 0.7rem 1.5rem; border-radius: 10px; background: rgba(255,255,255,0.1); color: #fff;">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Collections Table -->
+                <div class="table-container">
+                    <div class="orders-table">
+                        <table style="min-width: 1000px;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 120px;">Image</th>
+                                    <th>Collection Name</th>
+                                    <th>Collection Slug (ID)</th>
+                                    <th style="width: 180px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="collectionsTable">
+                                <tr>
+                                    <td colspan="4" class="no-orders">Loading collections...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 4: Reviews Management -->
+            <div id="sectionReviews" class="dashboard-section" style="display: none;">
+                <h2 style="margin-bottom: 1.5rem; font-size: 1.6rem;"><i class="fas fa-star" style="color: #ff4757; margin-right: 10px;"></i>Reviews Management</h2>
+                
+                <!-- Edit Review Form (Hidden by default) -->
+                <div id="editReviewFormContainer" style="display: none; background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border-radius: 18px; border: 1px solid rgba(255,255,255,0.1); padding: 1.5rem; margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 1rem; font-size: 1.1rem; color: #ccc;"><i class="fas fa-edit" style="color: #ff4757; margin-right: 8px;"></i>Edit Review</h3>
+                    <form id="editReviewForm" onsubmit="handleSaveReview(event)">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+                            <div>
+                                <label style="color: #aaa; font-size: 0.85rem; display: block; margin-bottom: 4px;">Customer Name *</label>
+                                <input type="text" id="editReviewName" required placeholder="Customer name..."
+                                    style="width:100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; font-family: inherit; font-size: 0.95rem;">
+                            </div>
+                            <div>
+                                <label style="color: #aaa; font-size: 0.85rem; display: block; margin-bottom: 4px;">Rating (1–5) *</label>
+                                <select id="editReviewRating" required style="width:100%; padding: 0.75rem; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; font-family: inherit; font-size: 0.95rem;">
+                                    <option value="5">5 Stars</option>
+                                    <option value="4">4 Stars</option>
+                                    <option value="3">3 Stars</option>
+                                    <option value="2">2 Stars</option>
+                                    <option value="1">1 Star</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="margin-top: 1rem;">
+                            <label style="color: #aaa; font-size: 0.85rem; display: block; margin-bottom: 4px;">Review Text *</label>
+                            <textarea id="editReviewText" required rows="3" placeholder="Review content..."
+                                style="width:100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; font-family: inherit; font-size: 0.95rem; resize: vertical;"></textarea>
+                        </div>
+                        <div style="margin-top: 1.5rem; display: flex; gap: 10px;">
+                            <button type="submit" class="login-btn" id="saveReviewBtn" style="width: auto; padding: 0.7rem 1.5rem; border-radius: 10px;">
+                                <i class="fas fa-save" style="margin-right: 8px;"></i>Save Changes
+                            </button>
+                            <button type="button" class="login-btn" onclick="cancelReviewEdit()" style="width: auto; padding: 0.7rem 1.5rem; border-radius: 10px; background: rgba(255,255,255,0.1); color: #fff;">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Reviews Stats Grid -->
+                <div class="stats" style="margin-bottom: 2rem;">
+                    <div class="stat-card" style="max-width: 320px;">
+                        <div class="stat-number" id="totalReviewsCount">0</div>
+                        <div>Total Reviews</div>
+                    </div>
+                </div>
+
+                <!-- Reviews Table Container -->
+                <div class="table-container">
+                    <div class="orders-table">
+                        <table style="min-width: 1000px;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 180px;">Customer Name</th>
+                                    <th style="width: 120px;">Rating</th>
+                                    <th>Review Text</th>
+                                    <th style="width: 200px;">Date Submitted</th>
+                                    <th style="width: 220px;">Review ID</th>
+                                    <th style="width: 120px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reviewsTable">
+                                <tr>
+                                    <td colspan="6" class="no-orders">Loading reviews...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+            let isLoggedIn = false;
+            let orders = [];
+            let subscribersList = [];
+            let subscribersUnsubscribe = null;
+
+            // ===== PAGINATION STATE =====
+            const PAGE_SIZE = 50;
+            let ordersPage = 1;
+            let subsPage = 1;
+            let ordersCursors = [null];
+            let hasMoreOrders = true;
+            let subsCursors = [null];
+            let hasMoreSubs = true;
+
+            function showDashboardSection(sectionId) {
+                // Hide all sections
+                document.getElementById('sectionOrders').style.display = 'none';
+                document.getElementById('sectionProducts').style.display = 'none';
+                document.getElementById('sectionSubscribers').style.display = 'none';
+                const reviewsSection = document.getElementById('sectionReviews');
+                if (reviewsSection) reviewsSection.style.display = 'none';
+                const collectionsSection = document.getElementById('sectionCollections');
+                if (collectionsSection) collectionsSection.style.display = 'none';
+
+                // Remove active class from all menu items
+                document.getElementById('menuBtnOrders').classList.remove('active');
+                document.getElementById('menuBtnProducts').classList.remove('active');
+                document.getElementById('menuBtnSubscribers').classList.remove('active');
+                const menuReviews = document.getElementById('menuBtnReviews');
+                if (menuReviews) menuReviews.classList.remove('active');
+                const menuCollections = document.getElementById('menuBtnCollections');
+                if (menuCollections) menuCollections.classList.remove('active');
+
+                // Show target section and highlight menu item
+                if (sectionId === 'orders') {
+                    document.getElementById('sectionOrders').style.display = 'block';
+                    document.getElementById('menuBtnOrders').classList.add('active');
+                } else if (sectionId === 'products') {
+                    document.getElementById('sectionProducts').style.display = 'block';
+                    document.getElementById('menuBtnProducts').classList.add('active');
+                } else if (sectionId === 'subscribers') {
+                    document.getElementById('sectionSubscribers').style.display = 'block';
+                    document.getElementById('menuBtnSubscribers').classList.add('active');
+                } else if (sectionId === 'reviews') {
+                    if (reviewsSection) reviewsSection.style.display = 'block';
+                    if (menuReviews) menuReviews.classList.add('active');
+                    loadReviewsList();
+                } else if (sectionId === 'collections') {
+                    if (collectionsSection) collectionsSection.style.display = 'block';
+                    if (menuCollections) menuCollections.classList.add('active');
+                    loadCollectionsList();
+                }
+            }
+
+            // Update Auth UI elements based on authentication status
+            function updateAuthUI(user) {
+                const loginContainer = document.getElementById('loginContainer');
+                const adminNav = document.getElementById('adminNav');
+                const dashboard = document.getElementById('dashboard');
+                
+                if (user) {
+                    isLoggedIn = true;
+                    if (loginContainer) loginContainer.style.display = 'none';
+                    if (adminNav) adminNav.style.display = 'flex';
+                    if (dashboard) {
+                        dashboard.classList.add('logged-in');
+                        dashboard.style.display = 'flex';
+                    }
+                    
+                    // Clear inputs upon successful login
+                    const emailInput = document.getElementById('adminEmail');
+                    const passInput = document.getElementById('adminPassword');
+                    if (emailInput) emailInput.value = '';
+                    if (passInput) passInput.value = '';
+
+                    // Trigger initial data loads
+                    loadOrders();
+                    loadProductList();
+                    loadSubscribers();
+                    loadReviewsList();
+                    loadCollectionsList();
+                } else {
+                    isLoggedIn = false;
+                    if (loginContainer) loginContainer.style.display = 'flex';
+                    if (adminNav) adminNav.style.display = 'none';
+                    if (dashboard) {
+                        dashboard.classList.remove('logged-in');
+                        dashboard.style.display = 'none';
+                    }
+                    if (subscribersUnsubscribe) {
+                        subscribersUnsubscribe();
+                        subscribersUnsubscribe = null;
+                    }
+                    // Reset page states
+                    ordersPage = 1;
+                    subsPage = 1;
+                    ordersCursors = [null];
+                    subsCursors = [null];
+                    hasMoreOrders = true;
+                    hasMoreSubs = true;
+
+                    // Clear data tables
+                    orders = [];
+                    subscribersList = [];
+                    renderOrders();
+                    renderSubscribers();
+                    cancelEdit(); // Reset product editing state on logout
+
+                    const reviewsTbody = document.getElementById('reviewsTable');
+                    if (reviewsTbody) {
+                        reviewsTbody.innerHTML = '<tr><td colspan="6" class="no-orders">Loading reviews...</td></tr>';
+                    }
+                    const totalReviewsEl = document.getElementById('totalReviewsCount');
+                    if (totalReviewsEl) totalReviewsEl.textContent = '0';
+                    cancelReviewEdit();
+
+                    const collectionsTbody = document.getElementById('collectionsTable');
+                    if (collectionsTbody) {
+                        collectionsTbody.innerHTML = '<tr><td colspan="4" class="no-orders">Loading collections...</td></tr>';
+                    }
+                    cancelCollectionEdit();
+                }
+            }
+
+            // Initialize Auth listener safely on module load
+            function initAuth() {
+                if (typeof window.firebaseOnAuthStateChanged !== 'function') {
+                    setTimeout(initAuth, 50);
+                    return;
+                }
+                
+                window.firebaseOnAuthStateChanged(window.firebaseAuth, (user) => {
+                    updateAuthUI(user);
+                });
+            }
+            initAuth();
+
+            async function login() {
+                const email = document.getElementById('adminEmail')?.value.trim() || '';
+                const password = document.getElementById('adminPassword')?.value || '';
+                
+                if (!email || !password) {
+                    alert('Please enter both email and password.');
+                    return;
+                }
+
+                const loginBtn = document.getElementById('loginBtn');
+                const originalText = loginBtn ? loginBtn.textContent : 'Login';
+                if (loginBtn) {
+                    loginBtn.disabled = true;
+                    loginBtn.textContent = 'Logging in...';
+                }
+
+                try {
+                    if (typeof window.firebaseSignIn !== 'function') {
+                        throw new Error('Firebase Auth system not ready. Please try again in a moment.');
+                    }
+                    await window.firebaseSignIn(window.firebaseAuth, email, password);
+                } catch (err) {
+                    console.error("Login failed:", err);
+                    let errMsg = err.message || 'Login failed. Please try again.';
+                    if (err.code === 'auth/invalid-credential' || errMsg.includes('invalid-credential') || errMsg.includes('invalid-email') || errMsg.includes('user-not-found') || errMsg.includes('wrong-password')) {
+                        errMsg = 'Invalid email or password.';
+                    }
+                    alert(errMsg);
+                } finally {
+                    if (loginBtn) {
+                        loginBtn.disabled = false;
+                        loginBtn.textContent = originalText;
+                    }
+                }
+            }
+
+            async function logout() {
+                try {
+                    if (typeof window.firebaseSignOut !== 'function') {
+                        throw new Error('Firebase Auth not ready.');
+                    }
+                    await window.firebaseSignOut(window.firebaseAuth);
+                } catch (err) {
+                    console.error("Logout failed:", err);
+                    alert("Logout failed. Please refresh the page.");
+                }
+            }
+
+            let subscribersCount = 0;
+
+            async function loadSubscribers() {
+                if (!isLoggedIn) return;
+                if (typeof window.dbGetSubscribers !== 'function' || typeof window.dbGetSubscribersCount !== 'function') {
+                    setTimeout(loadSubscribers, 50);
+                    return;
+                }
+
+                try {
+                    const searchQ = (document.getElementById('subSearchInput')?.value || '').trim();
+                    
+                    // Fetch subscribers page
+                    const result = await window.dbGetSubscribers({
+                        pageSize: PAGE_SIZE,
+                        startAfterDoc: subsCursors[subsPage - 1],
+                        searchQ: searchQ
+                    });
+
+                    if (result && result.ok) {
+                        subscribersList = result.subscribers || [];
+                        hasMoreSubs = subscribersList.length === PAGE_SIZE;
+                        if (hasMoreSubs) {
+                            subsCursors[subsPage] = result.lastDoc;
+                        }
+                        
+                        // Fetch aggregate subscriber counts
+                        subscribersCount = await window.dbGetSubscribersCount({ searchQ: searchQ });
+                        
+                        // Update total count stats card
+                        const totalEl = document.getElementById('totalSubscribers');
+                        if (totalEl) {
+                            const stats = await window.dbGetSubscribersStats();
+                            totalEl.textContent = stats.total;
+                        }
+
+                        renderSubscribers();
+                    } else {
+                        console.error("Subscribers update error:", result);
+                    }
+                } catch (err) {
+                    console.error("loadSubscribers error:", err);
+                }
+            }
+
+            // ===== SUBSCRIBERS RENDERING (with pagination) =====
+            function renderSubscribers() {
+                const tbody = document.getElementById('subscribersTable');
+                if (!tbody) return;
+
+                const searchQ = (document.getElementById('subSearchInput')?.value || '').trim();
+                const totalPages = Math.max(1, Math.ceil(subscribersCount / PAGE_SIZE));
+                if (subsPage > totalPages) subsPage = totalPages;
+
+                // Update pagination controls
+                const prevBtn = document.getElementById('subsPrevBtn');
+                const nextBtn = document.getElementById('subsNextBtn');
+                const pageInfo = document.getElementById('subsPageInfo');
+                if (prevBtn) prevBtn.disabled = subsPage <= 1;
+                if (nextBtn) nextBtn.disabled = !hasMoreSubs || subsPage >= totalPages;
+                if (pageInfo) pageInfo.textContent = `Page ${subsPage} of ${totalPages} (${subscribersCount} subscribers)`;
+
+                if (subscribersList.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="no-orders">${searchQ ? 'No matching subscribers found.' : 'No subscribers yet.'}</td></tr>`;
+                    return;
+                }
+
+                const escH = v => String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+                tbody.innerHTML = subscribersList.map(sub => {
+                    const email = sub.email || '';
+                    const dateObj = sub.subscribedAt ? new Date(sub.subscribedAt) : null;
+                    const formattedDate = dateObj && !isNaN(dateObj)
+                        ? dateObj.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+                        : (sub.subscribedAt || 'N/A');
+                    return `
+                        <tr>
+                            <td>${escH(email)}</td>
+                            <td>${escH(formattedDate)}</td>
+                            <td>${escH(sub.source || 'Bro Squad')}</td>
+                            <td><span style="color:#00ff88;font-weight:600;">${escH(sub.status || 'active')}</span></td>
+                            <td>
+                                <button class="action-btn delete-btn" onclick="deleteSubscriber('${escH(email)}')" title="Delete subscriber">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>`;
+                }).join('');
+            }
+
+            function subsChangePage(delta) {
+                const newPage = subsPage + delta;
+                if (newPage < 1) return;
+                subsPage = newPage;
+                loadSubscribers();
+            }
+
+            function onSubSearchChange() {
+                subsPage = 1;
+                subsCursors = [null];
+                hasMoreSubs = true;
+                loadSubscribers();
+            }
+
+            async function deleteSubscriber(email) {
+                if (!email) return;
+                const confirmed = confirm(`Are you sure you want to remove subscriber "${email}"?`);
+                if (!confirmed) return;
+
+                if (typeof window.dbDeleteSubscriber !== 'function') {
+                    alert('Database is still initializing. Please try again.');
+                    return;
+                }
+
+                try {
+                    await window.dbDeleteSubscriber(email);
+                    await loadSubscribers();
+                } catch (err) {
+                    console.error('Delete subscriber error:', err);
+                    alert('Failed to delete subscriber.');
+                }
+            }
+
+            async function downloadSubscribersCSV() {
+                if (typeof window.dbGetSubscribers !== 'function') {
+                    alert('Database not ready.');
+                    return;
+                }
+                
+                try {
+                    const searchQ = (document.getElementById('subSearchInput')?.value || '').trim();
+                    const res = await window.dbGetSubscribers({
+                        searchQ: searchQ,
+                        noLimit: true
+                    });
+                    
+                    const listToExport = res.subscribers || [];
+                    if (listToExport.length === 0) {
+                        alert('No subscribers to export.');
+                        return;
+                    }
+
+                    const headers = ['Email', 'Subscription Date', 'Source', 'Status'];
+
+                    const escapeCSV = (value) => {
+                        if (value === null || value === undefined) return '';
+                        const str = String(value);
+                        if (/[",\n]/.test(str)) {
+                            return `"${str.replace(/"/g, '""')}"`;
+                        }
+                        return str;
+                    };
+
+                    const rows = listToExport.map(sub => {
+                        const dateObj = sub.subscribedAt ? new Date(sub.subscribedAt) : null;
+                        const formattedDate = dateObj && !isNaN(dateObj) 
+                            ? dateObj.toISOString() 
+                            : (sub.subscribedAt || '');
+
+                        return [
+                            sub.email || '',
+                            formattedDate,
+                            sub.source || 'Bro Squad',
+                            sub.status || 'active'
+                        ].map(escapeCSV).join(',');
+                    });
+
+                    const csvContent = [headers.join(','), ...rows].join('\r\n');
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+
+                    const a = document.createElement('a');
+                    const url = URL.createObjectURL(blob);
+                    a.href = url;
+                    a.download = `gymbro-subscribers-${new Date().toISOString().slice(0, 10)}.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                } catch (err) {
+                    console.error("Export subscribers CSV failed:", err);
+                    alert("Export failed.");
+                }
+            }
+
+            async function seedCatalog() {
+                const confirmed = confirm('Are you sure you want to seed default products to Firestore? (Existing documents with matching names will be updated)');
+                if (!confirmed) return;
+
+                if (typeof window.dbSeedProducts !== 'function') {
+                    alert('Database is still initializing. Please try again in a moment.');
+                    return;
+                }
+
+                try {
+                    await window.dbSeedProducts();
+                    alert('Catalog successfully seeded to Firestore!');
+                } catch (err) {
+                    console.error(err);
+                    alert('Seeding failed.');
+                }
+            }
+
+            let filteredOrdersCount = 0;
+
+            async function loadOrders() {
+                if (!isLoggedIn) return;
+                // Wait if Firebase DB modules are not loaded yet
+                if (typeof window.dbGetOrders !== 'function' || typeof window.dbGetOrdersCount !== 'function') {
+                    setTimeout(loadOrders, 50);
+                    return;
+                }
+
+                try {
+                    const searchQ = (document.getElementById('orderSearchInput')?.value || '').trim();
+                    const dateFromVal = document.getElementById('orderDateFrom')?.value || '';
+                    const dateToVal   = document.getElementById('orderDateTo')?.value || '';
+                    const dateFrom = dateFromVal ? new Date(dateFromVal + 'T00:00:00') : null;
+                    const dateTo   = dateToVal   ? new Date(dateToVal   + 'T23:59:59') : null;
+
+                    const data = await window.dbGetOrders({
+                        pageSize: PAGE_SIZE,
+                        startAfterDoc: ordersCursors[ordersPage - 1],
+                        searchQ: searchQ,
+                        dateFrom: dateFrom,
+                        dateTo: dateTo
+                    });
+
+                    if (!data || !data.ok) {
+                        throw new Error('Failed to fetch orders');
+                    }
+
+                    // Normalize fields for existing renderOrders() usage
+                    orders = (data.orders || []).map(o => ({
+                        id: o.id || o._id,
+                        customer: o.customer,
+                        customerEmail: o.customerEmail || '',
+                        customerMobile: o.customerMobile || '',
+                        paymentMethod: o.paymentMethod || 'Unknown',
+                        items: o.items || [],
+                        total: o.total || 0,
+                        totalItems: o.totalItems || 0,
+                        date: o.date || '',
+                        status: o.status || 'pending',
+                        houseNo: o.houseNo || '',
+                        street: o.street || '',
+                        city: o.city || '',
+                        state: o.state || '',
+                        pincode: o.pincode || '',
+                        createdAt: o.createdAt || ''
+                    }));
+
+                    hasMoreOrders = orders.length === PAGE_SIZE;
+                    if (hasMoreOrders) {
+                        ordersCursors[ordersPage] = data.lastDoc;
+                    }
+
+                    // Fetch total count for matching filters
+                    filteredOrdersCount = await window.dbGetOrdersCount({
+                        searchQ: searchQ,
+                        dateFrom: dateFrom,
+                        dateTo: dateTo
+                    });
+
+                    renderOrders();
+                    await updateStats();
+                } catch (err) {
+                    console.error(err);
+                    alert('Failed to load orders from Firestore.');
+                    orders = [];
+                    renderOrders();
+                    updateStats();
+                }
+            }
+
+            async function updateStats() {
+                if (typeof window.dbGetOrdersStats !== 'function') {
+                    return;
+                }
+                try {
+                    const stats = await window.dbGetOrdersStats();
+                    
+                    document.getElementById('totalOrders').textContent = stats.total;
+                    document.getElementById('pendingOrders').textContent = stats.pending;
+                    document.getElementById('processingOrders').textContent = stats.processing;
+                    document.getElementById('shippedOrders').textContent = stats.shipped;
+                    document.getElementById('deliveredOrders').textContent = stats.delivered;
+                    document.getElementById('totalRevenue').textContent = `₹${stats.revenue.toLocaleString()}`;
+                } catch (err) {
+                    console.error("Error updating stats:", err);
+                }
+            }
+
+            // ===== ORDERS RENDERING (with search, date filter, pagination) =====
+            function renderOrders() {
+                const tbody = document.getElementById('ordersTable');
+                if (!tbody) return;
+
+                const searchQ = (document.getElementById('orderSearchInput')?.value || '').trim();
+                const dateFromVal = document.getElementById('orderDateFrom')?.value || '';
+                const dateToVal   = document.getElementById('orderDateTo')?.value || '';
+
+                const totalPages = Math.max(1, Math.ceil(filteredOrdersCount / PAGE_SIZE));
+                if (ordersPage > totalPages) ordersPage = totalPages;
+
+                // Update pagination controls
+                const prevBtn  = document.getElementById('ordersPrevBtn');
+                const nextBtn  = document.getElementById('ordersNextBtn');
+                const pageInfo = document.getElementById('ordersPageInfo');
+                if (prevBtn)  prevBtn.disabled  = ordersPage <= 1;
+                if (nextBtn)  nextBtn.disabled  = !hasMoreOrders || ordersPage >= totalPages;
+                if (pageInfo) pageInfo.textContent = `Page ${ordersPage} of ${totalPages} (${filteredOrdersCount} orders)`;
+
+                if (orders.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="15" class="no-orders">${searchQ || dateFromVal || dateToVal ? 'No matching orders found.' : 'No orders yet. Complete a checkout on main site to see orders here.'}</td></tr>`;
+                    return;
+                }
+
+                // Escape for safe usage inside inline JS attributes (onclick/onchange)
+                const escAttr = (v) => String(v ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+                tbody.innerHTML = orders.map(order => {
+                    const id = escAttr(order.id);
+                    const status = order.status || 'pending';
+
+                    return `
+                    <tr>
+                        <td>${escAttr(order.id)}</td>
+                        <td>${escAttr(order.customer)}</td>
+                        <td>${escAttr(order.customerEmail || '')}</td>
+                        <td>${escAttr(order.customerMobile || '')}</td>
+                        <td>${escAttr(order.houseNo || '')}</td>
+                        <td>${escAttr(order.street || '')}</td>
+                        <td>${escAttr(order.city || '')}</td>
+                        <td>${escAttr(order.state || '')}</td>
+                        <td>${escAttr(order.pincode || '')}</td>
+                        <td>${escAttr(order.totalItems)}</td>
+                        <td>₹${Number(order.total || 0).toLocaleString()}</td>
+                        <td>${escAttr(order.paymentMethod || 'Unknown')}</td>
+                        <td>${escAttr(order.date)}</td>
+                        <td>
+                            <select class="status-dropdown" data-order-id="${id}" onchange="onStatusDropdownChange('${id}', this.value)">
+                                <option value="pending" ${status === 'pending' ? 'selected' : ''}>Pending</option>
+                                <option value="processing" ${status === 'processing' ? 'selected' : ''}>Processing</option>
+                                <option value="shipped" ${status === 'shipped' ? 'selected' : ''}>Shipped</option>
+                                <option value="delivered" ${status === 'delivered' ? 'selected' : ''}>Delivered</option>
+                            </select>
+                        </td>
+                        <td>
+                            <button class="action-btn download-single-btn" onclick="downloadSingleOrder('${id}')" title="Download order summary">
+                                <i class="fas fa-file-download"></i>
+                            </button>
+                            <button class="action-btn delete-btn" onclick="deleteOrder('${id}')" title="Delete order">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                }).join('');
+            }
+
+            function ordersChangePage(delta) {
+                const newPage = ordersPage + delta;
+                if (newPage < 1) return;
+                ordersPage = newPage;
+                loadOrders();
+            }
+
+            function onOrderFilterChange() {
+                ordersPage = 1;
+                ordersCursors = [null];
+                hasMoreOrders = true;
+                loadOrders();
+            }
+
+            function clearOrderFilters() {
+                const searchEl = document.getElementById('orderSearchInput');
+                const fromEl   = document.getElementById('orderDateFrom');
+                const toEl     = document.getElementById('orderDateTo');
+                if (searchEl) searchEl.value = '';
+                if (fromEl)   fromEl.value   = '';
+                if (toEl)     toEl.value     = '';
+                ordersPage = 1;
+                ordersCursors = [null];
+                hasMoreOrders = true;
+                loadOrders();
+            }
+
+            async function updateOrderStatus(orderId, newStatus) {
+                try {
+                    await window.dbUpdateOrderStatus(orderId, newStatus);
+                    await loadOrders();
+                } catch (err) {
+                    console.error(err);
+                    alert('Failed to update order status.');
+                    await loadOrders();
+                }
+            }
+
+            async function deleteOrder(orderId) {
+                const confirmed = confirm('Are you sure you want to delete this order?');
+                if (!confirmed) return;
+
+                try {
+                    await window.dbDeleteOrder(orderId);
+                    await loadOrders();
+                } catch (err) {
+                    console.error(err);
+                    alert('Failed to delete order.');
+                }
+            }
+
+            function viewOrderDetails(orderId) {
+                const order = orders.find(o => o.id === orderId);
+                if (!order) return;
+
+                const itemsList = (order.items || [])
+                    .map(item => `${item.quantity}x ${item.name} (₹${Math.round((item.price || 0) * (item.quantity || 0))})`)
+                    .join('\n');
+
+                alert(`Order ${order.id}\nCustomer: ${order.customer}\nTotal Items: ${order.totalItems}\nTotal: ₹${order.total}\nStatus: ${order.status}\nDate: ${order.date}\n\nItems:\n${itemsList}`);
+            }
+
+            function downloadSingleOrder(orderId) {
+                const order = orders.find(o => o.id === orderId);
+                if (!order) {
+                    alert('Order not found!');
+                    return;
+                }
+
+                const itemsText = (order.items || [])
+                    .map(i => `${i.quantity}x ${i.name} (₹${Math.round(i.price)} each)`)
+                    .join('\n');
+
+                const content = `==================================================
+GYMBRO - ORDER INVOICE
+==================================================
+Order ID:        ${order.id}
+Date:            ${order.date}
+Status:          ${(order.status || 'pending').toUpperCase()}
+Payment Method:  ${order.paymentMethod || 'Unknown'}
+--------------------------------------------------
+CUSTOMER DETAILS:
+Name:            ${order.customer}
+Email:           ${order.customerEmail || 'N/A'}
+Mobile:          ${order.customerMobile || 'N/A'}
+--------------------------------------------------
+SHIPPING ADDRESS:
+House/Flat No:   ${order.houseNo || 'N/A'}
+Street:          ${order.street || 'N/A'}
+City:            ${order.city || 'N/A'}
+State:           ${order.state || 'N/A'}
+Pincode:         ${order.pincode || 'N/A'}
+--------------------------------------------------
+ORDER ITEMS:
+${itemsText}
+--------------------------------------------------
+Total Items:     ${order.totalItems}
+TOTAL AMOUNT:    ₹${Number(order.total || 0).toLocaleString()} INR
+==================================================
+Thank you for shopping with GYMBRO!
+`;
+
+                const blob = new Blob([content], { type: 'text/plain;charset=utf-8;' });
+                const a = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                a.href = url;
+                a.download = `gymbro-order-${order.id}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+
+            async function downloadOrdersCSV() {
+                if (typeof window.dbGetOrders !== 'function') {
+                    alert('Database not ready.');
+                    return;
+                }
+                
+                try {
+                    const searchQ = (document.getElementById('orderSearchInput')?.value || '').trim();
+                    const dateFromVal = document.getElementById('orderDateFrom')?.value || '';
+                    const dateToVal   = document.getElementById('orderDateTo')?.value || '';
+                    const dateFrom = dateFromVal ? new Date(dateFromVal + 'T00:00:00') : null;
+                    const dateTo   = dateToVal   ? new Date(dateToVal   + 'T23:59:59') : null;
+
+                    const res = await window.dbGetOrders({
+                        searchQ: searchQ,
+                        dateFrom: dateFrom,
+                        dateTo: dateTo,
+                        noLimit: true
+                    });
+
+                    const listToExport = (res.orders || []).map(o => ({
+                        id: o.id || o._id,
+                        customer: o.customer,
+                        customerEmail: o.customerEmail || '',
+                        customerMobile: o.customerMobile || '',
+                        paymentMethod: o.paymentMethod || 'Unknown',
+                        items: o.items || [],
+                        total: o.total || 0,
+                        totalItems: o.totalItems || 0,
+                        date: o.date || '',
+                        status: o.status || ''
+                    }));
+
+                    if (listToExport.length === 0) {
+                        alert('No orders to export.');
+                        return;
+                    }
+
+                    const headers = [
+                        'id',
+                        'customer',
+                        'customerEmail',
+                        'customerMobile',
+                        'paymentMethod',
+                        'date',
+                        'status',
+                        'totalItems',
+                        'total',
+                        'items'
+                    ];
+
+                    const escapeCSV = (value) => {
+                        if (value === null || value === undefined) return '';
+                        const str = String(value);
+                        if (/[",\n]/.test(str)) {
+                            return `"${str.replace(/"/g, '""')}"`;
+                        }
+                        return str;
+                    };
+
+                    const rows = listToExport.map(order => {
+                        const itemsText = (order.items || [])
+                            .map(i => `${i.quantity}x ${i.name}`)
+                            .join('; ');
+
+                        return [
+                            order.id,
+                            order.customer,
+                            order.customerEmail ?? '',
+                            order.customerMobile ?? '',
+                            order.paymentMethod ?? 'Unknown',
+                            order.date,
+                            order.status,
+                            order.totalItems,
+                            order.total,
+                            itemsText
+                        ].map(escapeCSV).join(',');
+                    });
+
+                    const csvContent = [headers.join(','), ...rows].join('\r\n');
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+
+                    const a = document.createElement('a');
+                    const url = URL.createObjectURL(blob);
+                    a.href = url;
+                    a.download = `gymbro-orders-${new Date().toISOString().slice(0, 10)}.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                } catch (err) {
+                    console.error("Export orders CSV failed:", err);
+                    alert("Export failed.");
+                }
+            }
+
+
+
+            async function onStatusDropdownChange(orderId, newStatus) {
+                // Immediately persist status, then refresh orders + stats.
+                await updateOrderStatus(orderId, newStatus);
+            }
+
+            // Refresh orders every 5s (store ID so it can be cleared on logout)
+            let ordersPollingInterval = setInterval(() => {
+                if (isLoggedIn) loadOrders();
+            }, 5000);
+
+            // ===== PRODUCT MANAGEMENT =====
+
+            let editingProductId = null; // null = add mode, string = edit mode
+            let cachedProducts = [];     // keep a local copy for edit lookups
+
+            function handleCategoryChange(value) {
+                const customContainer = document.getElementById('customCategoryContainer');
+                const customInput = document.getElementById('customCategoryInput');
+                if (value === '__custom__') {
+                    customContainer.style.display = 'block';
+                    customInput.required = true;
+                    customInput.focus();
+                } else {
+                    customContainer.style.display = 'none';
+                    customInput.required = false;
+                    customInput.value = '';
+                }
+            }
+
+            function populateCategorySelect() {
+                const select = document.getElementById('prodCategory');
+                if (!select) return;
+
+                const currentValue = select.value;
+
+                let html = '<option value="" disabled selected>Select category</option>';
+                const knownCats = new Set();
+
+                // Populate from collections first
+                adminCollections.forEach(c => {
+                    knownCats.add(c.id);
+                    html += `<option value="${c.id}">${c.name}</option>`;
+                });
+
+                // Add fallback default categories if not in collections
+                const defaultCats = {
+                    'hoodies': 'Hoodies',
+                    'oversized': 'Oversized Tees',
+                    'trackpants': 'Track Pants',
+                    'accessories': 'Accessories'
+                };
+                for (const [val, label] of Object.entries(defaultCats)) {
+                    if (!knownCats.has(val)) {
+                        knownCats.add(val);
+                        html += `<option value="${val}">${label}</option>`;
+                    }
+                }
+
+                // Add any other categories currently in cachedProducts but not in collections/defaults
+                cachedProducts.forEach(p => {
+                    if (p.category && !knownCats.has(p.category.toLowerCase().trim())) {
+                        const cat = p.category.toLowerCase().trim();
+                        knownCats.add(cat);
+                        const label = cat.split(/[-_]+/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                        html += `<option value="${cat}">${label}</option>`;
+                    }
+                });
+
+                html += '<option value="__custom__">+ Add Custom Category...</option>';
+
+                select.innerHTML = html;
+
+                if (currentValue && select.querySelector(`option[value="${currentValue}"]`)) {
+                    select.value = currentValue;
+                } else {
+                    select.value = "";
+                }
+            }
+
+            function setFormCategory(category) {
+                const select = document.getElementById('prodCategory');
+                const customContainer = document.getElementById('customCategoryContainer');
+                const customInput = document.getElementById('customCategoryInput');
+
+                if (!category) {
+                    select.value = "";
+                    customContainer.style.display = "none";
+                    customInput.value = "";
+                    customInput.required = false;
+                    return;
+                }
+
+                const optionExists = select.querySelector(`option[value="${category}"]`);
+                if (optionExists) {
+                    select.value = category;
+                    customContainer.style.display = "none";
+                    customInput.value = "";
+                    customInput.required = false;
+                } else {
+                    select.value = "__custom__";
+                    customContainer.style.display = "block";
+                    customInput.value = category;
+                    customInput.required = true;
+                }
+            }
+
+            // Image URL/Path preview — supports both http(s):// URLs and relative paths like images/foo.webp
+            document.getElementById('prodImage').addEventListener('input', function () {
+                const url = this.value.trim();
+                const previewDiv = document.getElementById('prodImagePreview');
+                const previewImg = document.getElementById('prodImagePreviewImg');
+                if (url) {
+                    previewImg.src = url;
+                    previewDiv.style.display = 'block';
+                    previewImg.onerror = () => { previewDiv.style.display = 'none'; };
+                    previewImg.onload = () => { previewDiv.style.display = 'block'; };
+                } else {
+                    previewDiv.style.display = 'none';
+                }
+            });
+
+            // Product image: file upload → data-URL → put in text input + show preview
+            function handleProdImageUpload(input) {
+                const file = input.files && input.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const dataUrl = e.target.result;
+                    const textInput = document.getElementById('prodImage');
+                    const previewDiv = document.getElementById('prodImagePreview');
+                    const previewImg = document.getElementById('prodImagePreviewImg');
+                    if (textInput) textInput.value = dataUrl;
+                    if (previewImg) previewImg.src = dataUrl;
+                    if (previewDiv) previewDiv.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+                // Reset so the same file can be re-selected
+                input.value = '';
+            }
+
+            // Collection image: file upload → data-URL → put in text input + show preview
+            function handleColImageUpload(input) {
+                const file = input.files && input.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const dataUrl = e.target.result;
+                    const textInput = document.getElementById('colImage');
+                    if (textInput) textInput.value = dataUrl;
+                    handleColImagePreview(dataUrl);
+                };
+                reader.readAsDataURL(file);
+                input.value = '';
+            }
+
+            // Collection image: URL/path preview on text input change
+            function handleColImagePreview(src) {
+                const previewDiv = document.getElementById('colImagePreview');
+                const previewImg = document.getElementById('colImagePreviewImg');
+                if (!previewDiv || !previewImg) return;
+                const val = (src || '').trim();
+                if (val) {
+                    previewImg.src = val;
+                    previewDiv.style.display = 'block';
+                    previewImg.onerror = () => { previewDiv.style.display = 'none'; };
+                    previewImg.onload = () => { previewDiv.style.display = 'block'; };
+                } else {
+                    previewDiv.style.display = 'none';
+                }
+            }
+
+            async function handleAddProduct(e) {
+                e.preventDefault();
+                const btn = document.getElementById('addProductBtn');
+                const isEditing = editingProductId !== null;
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i>${isEditing ? 'Updating...' : 'Adding...'}`;
+
+                let categoryValue = document.getElementById('prodCategory').value;
+                if (categoryValue === '__custom__') {
+                    const customText = document.getElementById('customCategoryInput').value.trim();
+                    if (!customText) {
+                        alert('Please type a custom category name.');
+                        resetBtn();
+                        return;
+                    }
+                    categoryValue = customText.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                    if (categoryValue.startsWith('-')) categoryValue = categoryValue.substring(1);
+                    if (categoryValue.endsWith('-')) categoryValue = categoryValue.substring(0, categoryValue.length - 1);
+                    if (!categoryValue) {
+                        alert('Please enter a valid custom category name (must contain alphanumeric characters).');
+                        resetBtn();
+                        return;
+                    }
+                }
+
+                const productData = {
+                    name: document.getElementById('prodName').value.trim(),
+                    category: categoryValue,
+                    price: Number(document.getElementById('prodPrice').value),
+                    stock: Number(document.getElementById('prodStock').value),
+                    image: document.getElementById('prodImage').value.trim(),
+                    description: document.getElementById('prodDescription').value.trim() || ''
+                };
+
+                if (!productData.name || !productData.category || !productData.price || !productData.image) {
+                    alert('Please fill in all required fields.');
+                    resetBtn();
+                    return;
+                }
+
+                if (typeof window.dbAddProduct !== 'function') {
+                    alert('Database is still initializing. Please try again in a moment.');
+                    resetBtn();
+                    return;
+                }
+
+                try {
+                    // When editing: pass existing id so dbAddProduct updates the correct document
+                    if (isEditing && editingProductId) {
+                        productData.id = editingProductId;
+                    }
+
+                    await window.dbAddProduct(productData);
+                    alert(`Product "${productData.name}" ${isEditing ? 'updated' : 'added'} successfully!`);
+                    cancelEdit();
+                    await loadProductList();
+                } catch (err) {
+                    console.error('Product save error:', err);
+                    let errMsg = err.message || 'Unknown error';
+                    if (errMsg.includes('permission-denied') || errMsg.includes('PERMISSION_DENIED')) {
+                        errMsg = 'Permission denied by Firestore. Please check your Firebase security rules allow writes to the products collection.';
+                    } else if (errMsg.includes('quota-exceeded') || errMsg.includes('RESOURCE_EXHAUSTED')) {
+                        errMsg = 'Firebase quota exceeded. Try again later or upgrade your Firebase plan.';
+                    } else if (errMsg.includes('unavailable') || errMsg.includes('UNAVAILABLE')) {
+                        errMsg = 'Firestore is temporarily unavailable. Please check your internet connection and try again.';
+                    }
+                    alert('Failed to save product: ' + errMsg);
+                }
+
+                resetBtn();
+
+                function resetBtn() {
+                    btn.disabled = false;
+                    if (editingProductId) {
+                        btn.innerHTML = '<i class="fas fa-save" style="margin-right: 8px;"></i>Update Product';
+                    } else {
+                        btn.innerHTML = '<i class="fas fa-plus" style="margin-right: 8px;"></i>Add Product';
+                    }
+                }
+            }
+
+            function editProduct(productId) {
+                const product = cachedProducts.find(p => {
+                    const pid = p.id || p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                    return pid === productId;
+                });
+                if (!product) {
+                    alert('Product not found.');
+                    return;
+                }
+
+                editingProductId = productId;
+
+                // Fill form fields
+                document.getElementById('prodName').value = product.name || '';
+                setFormCategory(product.category || '');
+                document.getElementById('prodPrice').value = product.price || '';
+                document.getElementById('prodStock').value = product.stock ?? 50;
+                document.getElementById('prodImage').value = product.image || '';
+                document.getElementById('prodDescription').value = product.description || '';
+
+                // Trigger image preview
+                document.getElementById('prodImage').dispatchEvent(new Event('input'));
+
+                // Update UI to edit mode
+                document.getElementById('productFormTitle').innerHTML = '<i class="fas fa-edit" style="color: #ffaa00; margin-right: 8px;"></i>Edit Product';
+                document.getElementById('addProductBtn').innerHTML = '<i class="fas fa-save" style="margin-right: 8px;"></i>Update Product';
+                document.getElementById('addProductBtn').style.background = '#ffaa00';
+                document.getElementById('cancelEditBtn').style.display = 'inline-block';
+
+                // Scroll to form
+                document.getElementById('addProductForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            function cancelEdit() {
+                editingProductId = null;
+                document.getElementById('addProductForm').reset();
+                document.getElementById('prodStock').value = 50;
+                document.getElementById('prodImagePreview').style.display = 'none';
+                setFormCategory('');
+
+                // Reset UI to add mode
+                document.getElementById('productFormTitle').innerHTML = '<i class="fas fa-plus-circle" style="color: #ff4757; margin-right: 8px;"></i>Add New Product';
+                document.getElementById('addProductBtn').innerHTML = '<i class="fas fa-plus" style="margin-right: 8px;"></i>Add Product';
+                document.getElementById('addProductBtn').style.background = '#ff4757';
+                document.getElementById('cancelEditBtn').style.display = 'none';
+            }
+
+            async function loadProductList() {
+                if (!isLoggedIn) return;
+                const container = document.getElementById('productListContainer');
+                if (!container) return;
+
+                if (typeof window.dbGetProducts !== 'function') {
+                    setTimeout(loadProductList, 100);
+                    return;
+                }
+
+                try {
+                    const data = await window.dbGetProducts();
+                    const products = data.products || [];
+                    cachedProducts = products;
+                    populateCategorySelect();
+
+                    if (products.length === 0) {
+                        container.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">No products found. Add your first product above.</p>';
+                        return;
+                    }
+
+                    const escH = (v) => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+                    container.innerHTML = products.map(p => {
+                        const pid = escH(p.id || p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'));
+                        return `
+                        <div style="display: flex; align-items: center; gap: 14px; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.06); flex-wrap: wrap;">
+                            <img src="${escH(p.image)}" alt="${escH(p.name)}" onerror="this.style.display='none'"
+                                style="width: 56px; height: 56px; border-radius: 10px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1); flex-shrink: 0;">
+                            <div style="flex: 1; min-width: 150px;">
+                                <div style="font-weight: 700; font-size: 0.95rem;">${escH(p.name)}</div>
+                                <div style="color: #aaa; font-size: 0.8rem;">${escH(p.category)} &bull; Stock: ${p.stock ?? '—'}</div>
+                            </div>
+                            <div style="font-weight: 800; color: #ff4757; font-size: 1rem; min-width: 80px;">₹${Number(p.price || 0).toLocaleString()}</div>
+                            <button onclick="editProduct('${pid}')" title="Edit product"
+                                style="background: rgba(255,170,0,0.15); border: 1px solid rgba(255,170,0,0.3); color: #ffaa00; padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 0.85rem; font-family: inherit; flex-shrink: 0;">
+                                <i class="fas fa-pen" style="margin-right: 4px;"></i>Edit
+                            </button>
+                            <button onclick="deleteProduct('${pid}')" title="Delete product"
+                                style="background: rgba(255,71,87,0.15); border: 1px solid rgba(255,71,87,0.3); color: #ff4757; padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 0.85rem; font-family: inherit; flex-shrink: 0;">
+                                <i class="fas fa-trash" style="margin-right: 4px;"></i>Delete
+                            </button>
+                        </div>`;
+                    }).join('');
+                } catch (err) {
+                    console.error('Load products error:', err);
+                    container.innerHTML = '<p style="text-align: center; color: #ff4757; padding: 2rem;">Failed to load products.</p>';
+                }
+            }
+
+            async function deleteProduct(productId) {
+                if (!confirm('Are you sure you want to delete this product?')) return;
+
+                if (typeof window.dbDeleteProduct !== 'function') {
+                    alert('Database is still initializing. Please try again.');
+                    return;
+                }
+
+                try {
+                    await window.dbDeleteProduct(productId);
+                    alert('Product deleted.');
+                    if (editingProductId === productId) cancelEdit();
+                    await loadProductList();
+                } catch (err) {
+                    console.error('Delete product error:', err);
+                    alert('Failed to delete product.');
+                }
+            }
+
+            // ===== REVIEWS MANAGEMENT =====
+            let adminReviews = [];
+            let editingReviewId = null;
+
+            async function loadReviewsList() {
+                if (!isLoggedIn) return;
+                if (typeof window.dbGetReviews !== 'function') {
+                    setTimeout(loadReviewsList, 100);
+                    return;
+                }
+
+                try {
+                    const result = await window.dbGetReviews();
+                    adminReviews = Array.isArray(result) ? result : (result?.reviews || []);
+                    
+                    const totalEl = document.getElementById('totalReviewsCount');
+                    if (totalEl) {
+                        totalEl.textContent = adminReviews.length;
+                    }
+
+                    renderAdminReviews();
+                } catch (err) {
+                    console.error("Failed to load reviews:", err);
+                    const tbody = document.getElementById('reviewsTable');
+                    if (tbody) {
+                        tbody.innerHTML = `<tr><td colspan="6" class="no-orders" style="color: #ff4757;">Failed to load reviews. ${err.code === 'permission-denied' ? 'Permission denied.' : ''}</td></tr>`;
+                    }
+                }
+            }
+
+            function renderAdminReviews() {
+                const tbody = document.getElementById('reviewsTable');
+                if (!tbody) return;
+
+                if (adminReviews.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="no-orders">No reviews found.</td></tr>';
+                    return;
+                }
+
+                const escH = v => String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g, '&#39;');
+
+                tbody.innerHTML = adminReviews.map(rv => {
+                    const id = escH(rv.id);
+                    const rating = Number(rv.rating) || 0;
+                    const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+                    
+                    const dateObj = rv.createdAt ? new Date(rv.createdAt) : null;
+                    const formattedDate = dateObj && !isNaN(dateObj)
+                        ? dateObj.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+                        : (rv.createdAt || 'N/A');
+
+                    return `
+                        <tr>
+                            <td>${escH(rv.name || 'Anonymous')}</td>
+                            <td style="color:#ffb800; font-size:1.1rem; letter-spacing:1px;">${escH(stars)}</td>
+                            <td style="max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escH(rv.text || '')}">${escH(rv.text || '')}</td>
+                            <td>${escH(formattedDate)}</td>
+                            <td>${id}</td>
+                            <td>
+                                <button class="action-btn download-single-btn" onclick="editAdminReview('${id}')" title="Edit review" style="margin-right: 6px; background: rgba(255,184,0,0.15); color: #ffb800; border: 1px solid rgba(255,184,0,0.3);">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn delete-btn" onclick="deleteAdminReview('${id}')" title="Delete review">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>`;
+                }).join('');
+            }
+
+            function editAdminReview(reviewId) {
+                const review = adminReviews.find(r => r.id === reviewId);
+                if (!review) return;
+
+                editingReviewId = reviewId;
+                document.getElementById('editReviewName').value = review.name || 'Anonymous';
+                document.getElementById('editReviewRating').value = String(review.rating || 5);
+                document.getElementById('editReviewText').value = review.text || '';
+                
+                const formContainer = document.getElementById('editReviewFormContainer');
+                if (formContainer) {
+                    formContainer.style.display = 'block';
+                    formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+
+            function cancelReviewEdit() {
+                editingReviewId = null;
+                const form = document.getElementById('editReviewForm');
+                if (form) form.reset();
+                
+                const formContainer = document.getElementById('editReviewFormContainer');
+                if (formContainer) formContainer.style.display = 'none';
+            }
+
+            async function handleSaveReview(e) {
+                e.preventDefault();
+                if (!editingReviewId) return;
+
+                const name = document.getElementById('editReviewName').value.trim();
+                const rating = Number(document.getElementById('editReviewRating').value) || 5;
+                const text = document.getElementById('editReviewText').value.trim();
+
+                if (!name || !text) {
+                    alert('Please fill out all fields.');
+                    return;
+                }
+
+                const btn = document.getElementById('saveReviewBtn');
+                const originalText = btn ? btn.textContent : 'Save Changes';
+                if (btn) {
+                    btn.disabled = true;
+                    btn.textContent = 'Saving...';
+                }
+
+                try {
+                    if (typeof window.dbUpdateReview !== 'function') {
+                        throw new Error('Database not ready.');
+                    }
+                    
+                    await window.dbUpdateReview(editingReviewId, {
+                        name: name,
+                        rating: rating,
+                        text: text
+                    });
+
+                    alert('Review updated successfully!');
+                    cancelReviewEdit();
+                    await loadReviewsList();
+                } catch (err) {
+                    console.error("Failed to update review:", err);
+                    let msg = 'Failed to update review. Please try again.';
+                    if (err.code === 'permission-denied') {
+                        msg = 'Permission denied. You do not have permissions to edit reviews.';
+                    }
+                    alert(msg);
+                } finally {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.textContent = originalText;
+                    }
+                }
+            }
+
+            async function deleteAdminReview(reviewId) {
+                if (!reviewId) return;
+                const confirmed = confirm(`Are you sure you want to delete review ID "${reviewId}"?`);
+                if (!confirmed) return;
+
+                try {
+                    if (typeof window.dbDeleteReview !== 'function') {
+                        throw new Error('Database not ready.');
+                    }
+                    await window.dbDeleteReview(reviewId);
+                    alert('Review deleted successfully!');
+                    if (editingReviewId === reviewId) cancelReviewEdit();
+                    await loadReviewsList();
+                } catch (err) {
+                    console.error("Failed to delete review:", err);
+                    let msg = 'Failed to delete review. Please try again.';
+                    if (err.code === 'permission-denied') {
+                        msg = 'Permission denied. You do not have permissions to delete reviews.';
+                    }
+                    alert(msg);
+                }
+            }
+
+            // ===== COLLECTIONS MANAGEMENT =====
+            let adminCollections = [];
+            let editingCollectionId = null;
+
+            async function loadCollectionsList() {
+                if (!isLoggedIn) return;
+                if (typeof window.dbGetCollections !== 'function') {
+                    setTimeout(loadCollectionsList, 100);
+                    return;
+                }
+
+                try {
+                    const result = await window.dbGetCollections();
+                    adminCollections = Array.isArray(result) ? result : [];
+                    
+                    // Refresh product categories select dropdown as collections list is loaded
+                    populateCategorySelect();
+
+                    renderAdminCollections();
+
+                } catch (err) {
+                    console.error("Failed to load collections:", err);
+                    const tbody = document.getElementById('collectionsTable');
+                    if (tbody) {
+                        tbody.innerHTML = `<tr><td colspan="4" class="no-orders" style="color: #ff4757;">Failed to load collections. ${err.code === 'permission-denied' ? 'Permission denied.' : ''}</td></tr>`;
+                    }
+                }
+            }
+
+            function renderAdminCollections() {
+                const tbody = document.getElementById('collectionsTable');
+                if (!tbody) return;
+
+                if (adminCollections.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="no-orders">No collections found.</td></tr>';
+                    return;
+                }
+
+                const escH = v => String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g, '&#39;');
+
+                tbody.innerHTML = adminCollections.map(c => {
+                    const id = escH(c.id);
+                    return `
+                        <tr>
+                            <td>
+                                <img src="${escH(c.image)}" alt="${escH(c.name)}" onerror="this.src='images/gymbro-logo.jpg'"
+                                    style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.15);">
+                            </td>
+                            <td style="font-weight: 700;">${escH(c.name)}</td>
+                            <td><code>${id}</code></td>
+                            <td>
+                                <button class="action-btn download-single-btn" onclick="editAdminCollection('${id}')" title="Edit collection" style="margin-right: 6px; background: rgba(255,184,0,0.15); color: #ffb800; border: 1px solid rgba(255,184,0,0.3);">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn delete-btn" onclick="deleteAdminCollection('${id}')" title="Delete collection">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>`;
+                }).join('');
+            }
+
+            function editAdminCollection(colId) {
+                const collection = adminCollections.find(c => c.id === colId);
+                if (!collection) return;
+
+                editingCollectionId = colId;
+                document.getElementById('colName').value = collection.name || '';
+                document.getElementById('colImage').value = collection.image || '';
+                // Show current image in preview
+                if (typeof handleColImagePreview === 'function') handleColImagePreview(collection.image || '');
+
+                // Change form title and button text for edit mode
+                document.getElementById('collectionFormTitle').innerHTML = '<i class="fas fa-edit" style="color: #ff4757; margin-right: 8px;"></i>Edit Collection';
+                document.getElementById('saveCollectionBtn').innerHTML = '<i class="fas fa-save" style="margin-right: 8px;"></i>Save Changes';
+                document.getElementById('cancelColEditBtn').style.display = 'block';
+
+                document.getElementById('collectionFormContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            function cancelCollectionEdit() {
+                editingCollectionId = null;
+                const form = document.getElementById('collectionForm');
+                if (form) form.reset();
+                // Hide collection image preview
+                const colPrev = document.getElementById('colImagePreview');
+                if (colPrev) colPrev.style.display = 'none';
+
+                // Reset UI to add mode
+                document.getElementById('collectionFormTitle').innerHTML = '<i class="fas fa-plus-circle" style="color: #ff4757; margin-right: 8px;"></i>Add New Collection';
+                document.getElementById('saveCollectionBtn').innerHTML = '<i class="fas fa-save" style="margin-right: 8px;"></i>Save Collection';
+                document.getElementById('cancelColEditBtn').style.display = 'none';
+            }
+
+            async function handleSaveCollection(e) {
+                e.preventDefault();
+
+                const name = document.getElementById('colName').value.trim();
+                const image = document.getElementById('colImage').value.trim();
+
+                if (!name || !image) {
+                    alert('Please fill out all fields.');
+                    return;
+                }
+
+                const btn = document.getElementById('saveCollectionBtn');
+                const originalText = btn ? btn.innerHTML : 'Save Collection';
+                if (btn) {
+                    btn.disabled = true;
+                    btn.textContent = 'Saving...';
+                }
+
+                try {
+                    if (editingCollectionId) {
+                        // Edit Mode
+                        if (typeof window.dbUpdateCollection !== 'function') throw new Error('Database not ready.');
+                        await window.dbUpdateCollection(editingCollectionId, { name, image });
+                        alert('Collection updated successfully!');
+                    } else {
+                        // Add Mode
+                        if (typeof window.dbAddCollection !== 'function') throw new Error('Database not ready.');
+                        await window.dbAddCollection({ name, image });
+                        alert('Collection added successfully!');
+                    }
+                    cancelCollectionEdit();
+                    await loadCollectionsList();
+                } catch (err) {
+                    console.error("Failed to save collection:", err);
+                    let msg = 'Failed to save collection. Please try again.';
+                    if (err.code === 'permission-denied') {
+                        msg = 'Permission denied. You do not have permissions to manage collections.';
+                    } else if (err.message) {
+                        msg = err.message;
+                    }
+                    alert(msg);
+                } finally {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = originalText;
+                    }
+                }
+            }
+
+            async function deleteAdminCollection(colId) {
+                if (!colId) return;
+                const confirmed = confirm(`Are you sure you want to delete collection "${colId}"?`);
+                if (!confirmed) return;
+
+                try {
+                    if (typeof window.dbDeleteCollection !== 'function') {
+                        throw new Error('Database not ready.');
+                    }
+                    await window.dbDeleteCollection(colId);
+                    alert('Collection deleted successfully!');
+                    if (editingCollectionId === colId) cancelCollectionEdit();
+                    await loadCollectionsList();
+                } catch (err) {
+                    console.error("Failed to delete collection:", err);
+                    let msg = 'Failed to delete collection. Please try again.';
+                    if (err.code === 'permission-denied') {
+                        msg = 'Permission denied. You do not have permissions to manage collections.';
+                    }
+                    alert(msg);
+                }
+            }
+
+
+        </script>
+</body>
+
+</html>

@@ -1,0 +1,2030 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GYMBRO - Premium Gymwear Australia</title>
+    <meta name="description"
+        content="GYMBRO - Premium Australian Gymwear engineered for performance. Shop hoodies, oversized tees, track pants and accessories.">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/collections.css">
+
+    <!-- FIREBASE SERVERLESS CONFIG & DB LAYERS -->
+    <script type="module" src="js/firebase-config.js"></script>
+    <script type="module" src="js/firebase-db.js"></script>
+
+    <!-- NAV TOGGLE: defined here in <head> so onclick works the instant button is tapped -->
+    <script>
+        function toggleGymbroMenu() {
+            var menu = document.getElementById('gymbroNavMenu');
+            var toggle = document.getElementById('gymbroNavToggle');
+            if (!menu || !toggle) return;
+            var isOpen = menu.classList.toggle('is-open');
+            document.body.classList.toggle('gymbro-menu-open', isOpen);
+            toggle.setAttribute('aria-expanded', String(isOpen));
+            toggle.classList.toggle('is-active', isOpen);
+        }
+        function closeGymbroMenu() {
+            var menu = document.getElementById('gymbroNavMenu');
+            var toggle = document.getElementById('gymbroNavToggle');
+            if (!menu || !toggle) return;
+            menu.classList.remove('is-open');
+            document.body.classList.remove('gymbro-menu-open');
+            toggle.setAttribute('aria-expanded', 'false');
+            toggle.classList.remove('is-active');
+        }
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #000;
+            color: #fff;
+            line-height: 1.6;
+        }
+
+        /* NAVBAR WITH CART */
+        .navbar {
+            position: sticky;
+            top: 0;
+            background: rgba(0, 0, 0, 0.95);
+            padding: 1rem 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-logo h1 {
+            font-size: 2rem;
+            font-weight: 800;
+        }
+
+        .cart-icon {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* HERO - PROFESSIONAL GRID WITH 3D ANIMATION */
+        .hero {
+            min-height: calc(100vh - 90px);
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 3rem;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: clamp(7rem, 12vh, 10rem) 2rem 4rem;
+            background: #000;
+            text-align: left;
+            overflow: hidden;
+        }
+
+        .hero-container {
+            width: 100%;
+            max-width: 1400px;
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .hero-text {
+            max-width: 900px;
+            flex: 0 1 auto;
+            text-align: left;
+            transform: translateY(-140px);
+        }
+
+        /* Desktop-only: nudge the entire left hero block down (do not affect tablet/mobile) */
+        @media (min-width: 1024px) {
+            .hero-text {
+                transform: translateY(-120px);
+            }
+
+            .hero-video {
+                margin-top: 670px;
+                /* Shift the dumbbell video further up to align with text */
+                max-width: 750px;
+            }
+        }
+
+
+        .hero-video {
+            width: 100%;
+            max-width: 750px;
+            aspect-ratio: 1 / 1;
+            height: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: -155px;
+            margin-left: 0;
+            position: relative;
+            overflow: hidden;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+        }
+
+        .hero-video::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            background:
+                radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.3) 100%),
+                linear-gradient(to right, #000 0%, rgba(0, 0, 0, 0.6) 8%, transparent 20%, transparent 80%, rgba(0, 0, 0, 0.6) 92%, #000 100%);
+            pointer-events: none;
+            border-radius: inherit;
+        }
+
+        .hero-video::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 3;
+            backdrop-filter: blur(0px);
+            background: radial-gradient(ellipse at center, transparent 60%, rgba(0, 0, 0, 0.5) 100%);
+            pointer-events: none;
+            border-radius: inherit;
+        }
+
+        .hero-content {
+            max-width: 600px;
+            padding: 0;
+        }
+
+        .hero-tag {
+            font-size: clamp(0.9rem, 1.2vw, 1rem);
+            letter-spacing: 0.35em;
+            color: #ccc;
+            margin-bottom: 0.5rem;
+            margin-top: -0.5rem;
+            text-transform: uppercase;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+        }
+
+        .hero-heading {
+            font-size: clamp(4rem, 6.5vw, 7rem);
+            font-weight: 900;
+            line-height: 0.84;
+            letter-spacing: -0.05em;
+            margin-bottom: 2.5rem;
+            max-width: 40ch;
+        }
+
+        .hero-heading .hero-highlight {
+            color: #c7a96e;
+            text-shadow: 0 2px 6px rgba(199, 169, 110, 0.3);
+        }
+
+        .hero-heading .grind {
+            display: block;
+            white-space: nowrap;
+            color: #f5f1e7;
+            letter-spacing: -0.03em;
+            margin-left: 0;
+        }
+
+        .hero-subtext {
+            font-size: clamp(1.1rem, 2vw, 1.4rem);
+            font-weight: 300;
+            color: #d6d4cf;
+            line-height: 1.75;
+            margin-bottom: 1.5rem;
+            max-width: 700px;
+        }
+
+        .hero-subtext span {
+            display: block;
+            margin-top: 0.50em;
+            font-weight: 400;
+        }
+
+        .hero-buttons {
+            display: flex;
+            flex-direction: row;
+            gap: 1.5rem;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .btn {
+            padding: 18px 38px;
+            border: none;
+            border-radius: 55px;
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            min-height: 62px;
+            min-width: 180px;
+        }
+
+        .hero-subtext {
+            font-size: clamp(16px, 3vw, 20px);
+            font-weight: 300;
+            color: #ccc;
+            line-height: 1.6;
+            margin-bottom: 48px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            flex-direction: row;
+            gap: 1.5rem;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .btn {
+            padding: 16px 32px;
+            border: none;
+            border-radius: 50px;
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            min-height: 56px;
+        }
+
+        .btn-primary {
+            background: #fff;
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid #fff;
+            color: #fff;
+        }
+
+        .btn-secondary:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        .btn-cart {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 12px;
+            width: 100%;
+        }
+
+        .btn-cart:hover {
+            background: #ff3748;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 71, 87, 0.4);
+        }
+
+        /* COLLECTIONS */
+        .collections {
+            padding: 100px 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .collections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+
+        @media (max-width: 768px) {
+            .collections-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .collection-card {
+            aspect-ratio: 4 / 3;
+            min-height: 280px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .collection-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+            border-radius: inherit;
+        }
+
+        .collection-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .collection-card.active {
+            border: 2px solid #ff4757;
+            box-shadow: 0 0 20px rgba(255, 71, 87, 0.5);
+            border-radius: inherit;
+        }
+
+        .collection-title {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            right: 30px;
+            font-size: 32px;
+            font-weight: 700;
+            z-index: 2;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        /* PRODUCTS */
+        .products {
+            padding: 100px 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+
+        .product-card {
+            background: #111;
+            border-radius: 20px;
+            overflow: hidden;
+            transition: 0.3s ease;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px) scale(1.04);
+            box-shadow: 0 20px 40px rgba(255, 71, 87, 0.3);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 280px;
+            min-height: 280px;
+            max-height: 280px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            object-fit: cover;
+        }
+
+        .sale-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #ff4757;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .product-info {
+            padding: 25px;
+        }
+
+        .category-label {
+            font-size: 12px;
+            color: #ff4757;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .product-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .price {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ff4757;
+            margin-bottom: 16px;
+        }
+
+        .filter-btn {
+            background: rgba(255, 255, 255, 0.07);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 999px;
+            padding: 10px 18px;
+            cursor: pointer;
+            font: inherit;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: #ff4757;
+            border-color: #ff4757;
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(255, 71, 87, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .product-card {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.35s ease, transform 0.35s ease;
+        }
+
+        .product-card.fade-out {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+
+        .product-card.hidden {
+            display: none !important;
+            opacity: 0;
+            transform: translateY(12px);
+        }
+
+        /* OUR STORY - PREMIUM DARK LUXURY */
+        .story {
+            position: relative;
+            padding: clamp(6rem, 12vh, 9rem) clamp(1rem, 4vw, 2rem);
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .story::before,
+        .story::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 24px;
+            pointer-events: none;
+        }
+
+        .story::before {
+            background: linear-gradient(135deg, #030303 0%, #101010 48%, #1a1a1a 100%);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), 0 0 30px rgba(255, 71, 87, 0.08);
+        }
+
+        .story::after {
+            opacity: 0.12;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.5) 0.7px, transparent 0.7px);
+            background-size: 8px 8px;
+            mix-blend-mode: soft-light;
+        }
+
+        .story-container {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: 1.05fr 1fr;
+            gap: clamp(2.5rem, 6vw, 5rem);
+            align-items: center;
+            padding: clamp(1.25rem, 3vw, 2rem);
+        }
+
+        .story-media {
+            aspect-ratio: 4 / 3;
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 71, 87, 0.08);
+        }
+
+        .story-media::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.28) 50%, rgba(0, 0, 0, 0.02) 100%);
+            pointer-events: none;
+        }
+
+        .story-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transform: scale(1.01);
+            transition: transform 0.5s ease;
+        }
+
+        .story-media:hover .story-image {
+            transform: scale(1.05);
+        }
+
+        .story-content {
+            text-align: left;
+            max-width: 560px;
+        }
+
+        .story-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.28em;
+            margin-bottom: 1.1rem;
+        }
+
+        .story-tag::before {
+            content: '';
+            width: 28px;
+            height: 1px;
+            background: linear-gradient(90deg, #ff4757 0%, rgba(255, 255, 255, 0.2) 100%);
+        }
+
+        .story-tag::after {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #ff4757;
+            box-shadow: 0 0 14px rgba(255, 71, 87, 0.7);
+        }
+
+        .story-title {
+            font-size: clamp(2.75rem, 5vw, 4.35rem);
+            font-weight: 800;
+            line-height: 1.05;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.35rem;
+            color: #fff;
+            text-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+        }
+
+        .story-description {
+            font-size: clamp(1rem, 1.9vw, 1.18rem);
+            color: #ccc;
+            line-height: 1.8;
+            font-weight: 300;
+            margin-bottom: 1rem;
+        }
+
+        .story-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.65rem;
+            margin-top: 1rem;
+            padding: 0.95rem 1.5rem;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(135deg, #ff4757 0%, #ff6b81 100%);
+            box-shadow: 0 12px 30px rgba(255, 71, 87, 0.28), 0 0 18px rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .story-cta:hover {
+            /* keep the hover lift but remove glow */
+            transform: translateY(-3px);
+            box-shadow: none;
+        }
+
+
+
+        .story-cta span {
+            transition: transform 0.3s ease;
+        }
+
+        .story-cta:hover span {
+            transform: translateX(4px);
+        }
+
+        .story-reveal {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .story-reveal.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* GYM BRO IMAGE SECTION */
+        .gym-bro-image {
+            padding: 0;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .gym-bro-img {
+            width: 100%;
+            height: 60vh;
+            background-image: url('images/gym-bro-below-story.avif');
+            background-size: cover;
+            background-position: center;
+            border-radius: 0;
+        }
+
+        /* JOIN BROTHERHOOD */
+        .subscribe {
+            padding: 100px 20px;
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .subscribe h2 {
+            font-size: 40px;
+            margin-bottom: 16px;
+        }
+
+        .subscribe p {
+            color: #ccc;
+            margin-bottom: 40px;
+        }
+
+        .subscribe-form {
+            display: flex;
+            gap: 16px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .subscribe-input {
+            flex: 1;
+            padding: 16px 24px;
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 50px;
+            color: white;
+            font-size: 16px;
+        }
+
+        .subscribe-btn {
+            padding: 16px 32px;
+            background: #ff4757;
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* CART SIDEBAR */
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background: #111;
+            transition: right 0.4s ease;
+            z-index: 2000;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .cart-sidebar.active {
+            right: 0;
+        }
+
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #333;
+        }
+
+        .cart-total {
+            font-size: 28px;
+            font-weight: 700;
+            color: #ff4757;
+            margin-top: 20px;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .cart-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1500;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .cart-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* NAVBAR ANIMATION VIDEO */
+        .navbar-video {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .navbar-dumbbell {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            mix-blend-mode: screen;
+            filter: brightness(1.2) contrast(1.1);
+            transition: transform 0.4s ease;
+        }
+
+        .navbar-video:hover .navbar-dumbbell {
+            transform: scale(1.1);
+        }
+
+        .hero-video video {
+            mix-blend-mode: screen;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-video * {
+            background: transparent !important;
+        }
+
+
+
+        .hero-dumbbell {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+            background: transparent;
+            pointer-events: none;
+            mix-blend-mode: screen;
+            filter: brightness(0.92) contrast(1.05) drop-shadow(0 0 10px rgba(255, 255, 255, 0.08));
+            transform: perspective(1000px) rotateY(5deg) rotateX(3deg) translateY(-40px);
+            transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 0.6s ease;
+        }
+
+        .hero-video:hover .hero-dumbbell {
+            transform: perspective(1000px) rotateY(0deg) rotateX(0deg) translateY(-40px) scale(1.05);
+        }
+
+        @keyframes moveLight {
+            0% {
+                transform: translate(-20px, -10px);
+            }
+
+            50% {
+                transform: translate(20px, 10px);
+            }
+
+            100% {
+                transform: translate(-20px, -10px);
+            }
+        }
+
+
+        /* RESPONSIVE */
+        @media (max-width: 1000px) {
+
+            /* ===== Mobile-only: remove horizontal overflow + improve stacking ===== */
+            body {
+                overflow-x: hidden;
+            }
+
+            .hero {
+                grid-template-columns: 1fr;
+                flex-direction: column;
+                text-align: left;
+                gap: 1.5rem;
+                padding: 8.5rem 16px 0rem !important;
+                align-items: center;
+                justify-content: center;
+                min-height: auto;
+            }
+
+            .hero-container {
+                width: 100%;
+                max-width: 100%;
+                flex-direction: column;
+                gap: 1.5rem;
+                margin-top: 0;
+                align-items: center;
+            }
+
+            .hero-text {
+                order: 1;
+                width: 100%;
+                max-width: 100%;
+                transform: translateY(-30px);
+            }
+
+            .hero-tag {
+                position: relative !important;
+                z-index: 10 !important;
+                margin-top: 0 !important;
+                margin-bottom: 1rem !important;
+                font-size: 0.85rem !important;
+                letter-spacing: 0.3em !important;
+                color: #d4af70 !important;
+                text-transform: uppercase !important;
+                text-shadow: 0 0 12px rgba(212, 175, 112, 0.5) !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                display: block !important;
+                font-weight: 700 !important;
+                -webkit-text-fill-color: #d4af70 !important;
+                background: none !important;
+            }
+
+            .hero-video {
+                order: 2;
+                width: 100%;
+                max-width: 100%;
+                min-height: 0;
+                height: auto;
+                aspect-ratio: 18 / 11;
+                overflow: hidden;
+                position: relative;
+                margin: 0 auto;
+                margin-top: 20;
+                margin-bottom: 35px;
+                flex-shrink: 0;
+                transform: none;
+                padding: 0;
+            }
+
+            .hero-heading {
+                max-width: 100%;
+                line-height: 1.05;
+                overflow-wrap: break-word;
+                word-break: break-word;
+                white-space: normal;
+                margin-bottom: 1.2rem;
+            }
+
+            .hero-subtext {
+                font-size: clamp(0.95rem, 2.2vw, 1.15rem);
+                line-height: 1.6;
+                max-width: 100%;
+                margin-bottom: 1.5rem;
+            }
+
+            .hero-heading .grind {
+                white-space: normal;
+                display: block;
+                margin-left: 0;
+            }
+
+            .hero-buttons {
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+
+            .btn {
+                max-width: 100%;
+            }
+
+            /* Mobile-only dumbbell animation (does not affect desktop) */
+            @keyframes mobileDumbbellFloat {
+                0% {
+                    transform: perspective(800px) rotateY(5deg) rotateX(3deg) translateY(-10px);
+                }
+
+                50% {
+                    transform: perspective(800px) rotateY(0deg) rotateX(0deg) translateY(10px);
+                }
+
+                100% {
+                    transform: perspective(800px) rotateY(5deg) rotateX(3deg) translateY(-10px);
+                }
+            }
+
+            .hero-dumbbell {
+                pointer-events: none;
+                will-change: transform, filter;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                object-position: center;
+                transform: none !important;
+                margin: 0 auto;
+                animation: mobileDumbbellFloat 1.8s ease-in-out infinite;
+                filter: brightness(0.82) contrast(1.02);
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                .hero-dumbbell {
+                    animation: none !important;
+                }
+            }
+
+            .hero-video::before,
+            .hero-video::after {
+                content: "";
+                position: absolute;
+                top: 0;
+                width: 64px;
+                height: 100%;
+                z-index: 2;
+                pointer-events: none;
+            }
+
+            .hero-video::before {
+                left: 0;
+                background: linear-gradient(to right, #000 0%, transparent 100%);
+            }
+
+            .hero-video::after {
+                right: 0;
+                background: linear-gradient(to left, #0a000001 0%, transparent 100%);
+            }
+
+            .hero-video video {
+                mix-blend-mode: screen;
+                object-fit: cover;
+                object-position: center;
+                width: 120%;
+                height: 120%;
+                transform: none;
+            }
+
+            .story {
+                padding: 80px 14px;
+            }
+
+            .story-container {
+                grid-template-columns: 1fr;
+                gap: 1.75rem;
+                padding: 1rem;
+            }
+
+            .story-content {
+                max-width: 100%;
+            }
+
+            .gym-bro-image .gym-bro-img {
+                height: 40vh;
+            }
+
+            .collections-grid,
+            .product-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+
+            .collections {
+                padding: 20px 16px 40px !important;
+            }
+
+            .subscribe-form {
+                flex-direction: column;
+            }
+
+            .cart-sidebar {
+                width: 100%;
+                right: -100%;
+            }
+        }
+
+        /* GYMBRO SCOPED NAVBAR COMPONENT */
+        .gymbro-navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1rem 0;
+            background: rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            z-index: 1200;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .gymbro-navbar.gymbro-navbar--scrolled {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom-color: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .gymbro-navbar__inner {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .gymbro-navbar__brand {
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+            color: #fff;
+            font-size: clamp(1.15rem, 2vw, 1.35rem);
+            font-weight: 800;
+            letter-spacing: 0.24em;
+            text-transform: uppercase;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        .gymbro-navbar__brand img {
+            height: 40px;
+            width: auto;
+            display: block;
+            margin: 0;
+        }
+
+        .gymbro-navbar__brand:hover {
+            opacity: 0.85;
+            transform: translateY(-1px);
+        }
+
+        .gymbro-navbar__toggle {
+            display: none;
+            width: 48px;
+            height: 48px;
+            margin-left: auto;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.04);
+            color: #fff;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            transition: background 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+        }
+
+        .gymbro-navbar__toggle:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.16);
+        }
+
+        .gymbro-navbar__toggle-line {
+            width: 18px;
+            height: 2px;
+            border-radius: 999px;
+            background: #fff;
+            transition: transform 0.28s ease, opacity 0.28s ease;
+        }
+
+        .gymbro-navbar__toggle.is-active .gymbro-navbar__toggle-line:nth-child(1) {
+            transform: translateY(7px) rotate(45deg);
+        }
+
+        .gymbro-navbar__toggle.is-active .gymbro-navbar__toggle-line:nth-child(2) {
+            opacity: 0;
+        }
+
+        .gymbro-navbar__toggle.is-active .gymbro-navbar__toggle-line:nth-child(3) {
+            transform: translateY(-7px) rotate(-45deg);
+        }
+
+        .gymbro-navbar__menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-left: auto;
+        }
+
+        .gymbro-navbar__link,
+        .gymbro-navbar__cart {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.55rem;
+            padding: 0.7rem 0.95rem;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: #fff;
+            font: inherit;
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease, transform 0.25s ease;
+        }
+
+        .gymbro-navbar__link:hover,
+        .gymbro-navbar__cart:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.12);
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 255, 255, 0.15);
+        }
+
+        .gymbro-navbar__link--cta {
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .gymbro-navbar__cart {
+            position: relative;
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .gymbro-navbar__cart .gymbro-navbar__cart-count {
+            position: static;
+            min-width: 22px;
+            width: auto;
+            height: auto;
+            padding: 0.05rem 0.42rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            line-height: 1.4;
+            background: #ff4757;
+        }
+
+        @keyframes gymbroNavFade {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            body.gymbro-menu-open {
+                overflow: hidden;
+            }
+
+            .gymbro-navbar__toggle {
+                display: inline-flex;
+            }
+
+            .gymbro-navbar__menu {
+                position: absolute;
+                top: calc(100% + 12px);
+                left: 0;
+                right: 0;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.45rem;
+                padding: 0.85rem;
+                background: rgba(10, 10, 10, 0.96);
+                backdrop-filter: blur(18px);
+                -webkit-backdrop-filter: blur(18px);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 18px;
+                box-shadow: 0 16px 40px rgba(0, 0, 0, 0.32);
+                opacity: 0;
+                visibility: hidden;
+                pointer-events: none;
+                transform: translateY(-12px);
+                transition: opacity 0.28s ease, transform 0.28s ease, visibility 0.28s ease;
+            }
+
+            .gymbro-navbar__menu.is-open {
+                opacity: 1;
+                visibility: visible;
+                pointer-events: auto;
+                transform: translateY(0);
+                animation: gymbroNavFade 0.28s ease;
+            }
+
+            .gymbro-navbar__link,
+            .gymbro-navbar__cart {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .filter-container {
+                flex-wrap: nowrap !important;
+                justify-content: flex-start !important;
+                overflow-x: auto !important;
+                padding: 15px 16px !important;
+                -webkit-overflow-scrolling: touch;
+                width: 100%;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+            }
+
+            .filter-container::-webkit-scrollbar {
+                display: none;
+            }
+
+            .filter-btn {
+                flex-shrink: 0 !important;
+            }
+        }
+
+        /* ====================================================
+         * CHECKOUT MODAL
+         * ==================================================== */
+        .co-modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.88);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .co-modal-overlay.is-open {
+            display: flex;
+        }
+
+        .co-modal-box {
+            background: #111;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 560px;
+            max-height: 92vh;
+            overflow-y: auto;
+            padding: 2rem;
+            position: relative;
+            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 71, 87, 0.06);
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 71, 87, 0.4) transparent;
+        }
+
+        .co-modal-box::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .co-modal-box::-webkit-scrollbar-thumb {
+            background: rgba(255, 71, 87, 0.4);
+            border-radius: 4px;
+        }
+
+        .co-close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 1.25rem;
+            cursor: pointer;
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+            line-height: 1;
+        }
+
+        .co-close-btn:hover {
+            background: rgba(255, 71, 87, 0.2);
+            border-color: rgba(255, 71, 87, 0.4);
+        }
+
+        .co-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .co-full {
+            grid-column: 1 / -1;
+        }
+
+        .co-label {
+            display: block;
+            color: #999;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .co-input {
+            width: 100%;
+            padding: 0.72rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.93rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .co-input:focus {
+            outline: none;
+            border-color: #ff4757;
+            box-shadow: 0 0 0 3px rgba(255, 71, 87, 0.14);
+        }
+
+        .co-input::placeholder {
+            color: #555;
+        }
+
+        /* Custom styled payment method select dropdown */
+        select.co-input {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1rem;
+            padding-right: 2.5rem;
+            cursor: pointer;
+        }
+
+        /* Placeholder color state for the select element itself */
+        select.co-input:has(option[value=""]:checked) {
+            color: #555;
+        }
+
+        /* Styling option list items */
+        select.co-input option {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            padding: 8px;
+        }
+
+        /* Option dropdown item styling for disabled first option */
+        select.co-input option[value=""] {
+            color: #555;
+        }
+
+        .co-field-err {
+            display: none;
+            color: #ff4757;
+            font-size: 0.76rem;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        .co-summary {
+            margin: 1.4rem 0;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .co-summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+            font-size: 0.86rem;
+            color: #ccc;
+        }
+
+        .co-summary-row.co-total {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 8px;
+            padding-top: 10px;
+            font-weight: 700;
+            font-size: 0.98rem;
+            color: #ff4757;
+        }
+
+        .co-place-btn {
+            width: 100%;
+            padding: 1rem;
+            background: #ff4757;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .co-place-btn:hover:not(:disabled) {
+            background: #ff3748;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 71, 87, 0.4);
+        }
+
+        .co-place-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        @keyframes toastSlideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .co-modal-box {
+                padding: 1.25rem 1rem;
+                border-radius: 16px;
+                max-height: 96vh;
+            }
+
+            .co-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .co-full {
+                grid-column: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="cart-overlay" id="cartOverlay"></div>
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h2>Shopping Cart</h2>
+            <button onclick="closeCart()"
+                style="background: none; border: none; font-size: 24px; cursor: pointer;">×</button>
+        </div>
+        <div id="cartItems"></div>
+        <div class="cart-total" id="cartTotal">₹0 INR</div>
+        <button class="checkout-btn" onclick="openCheckoutModal()"><img src="images/gymbro-logo.jpg" alt="GymBro"
+                style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;">PROCEED TO
+            CHECKOUT</button>
+    </div>
+
+    <!-- CHECKOUT MODAL -->
+    <div class="co-modal-overlay" id="checkoutModal" role="dialog" aria-modal="true" aria-labelledby="coModalTitle">
+        <div class="co-modal-box">
+            <button class="co-close-btn" onclick="closeCheckoutModal()" aria-label="Close checkout">×</button>
+
+            <div style="margin-bottom:1.5rem;">
+                <img src="images/gymbro.png" alt="GymBro" style="height:28px; margin-bottom:0.65rem;">
+                <h2 id="coModalTitle" style="font-size:1.35rem; font-weight:800; color:#fff; margin-bottom:4px;">
+                    Complete Your Order</h2>
+                <p style="color:#777; font-size:0.84rem;">Fill in your shipping details to place the order.</p>
+            </div>
+
+            <form id="checkoutForm" onsubmit="submitCheckoutOrder(event)" novalidate>
+                <div class="co-grid">
+                    <!-- Full Name -->
+                    <div class="co-full">
+                        <label class="co-label" for="co_name">Full Name *</label>
+                        <input class="co-input" id="co_name" type="text" placeholder="e.g. Rahul Sharma"
+                            autocomplete="name">
+                        <span class="co-field-err" id="co_name_err"></span>
+                    </div>
+                    <!-- Email -->
+                    <div>
+                        <label class="co-label" for="co_email">Email *</label>
+                        <input class="co-input" id="co_email" type="email" placeholder="you@gmail.com"
+                            autocomplete="email">
+                        <span class="co-field-err" id="co_email_err"></span>
+                    </div>
+                    <!-- Mobile -->
+                    <div>
+                        <label class="co-label" for="co_mobile">Mobile Number *</label>
+                        <input class="co-input" id="co_mobile" type="tel" placeholder="9876543210" maxlength="10"
+                            autocomplete="tel">
+                        <span class="co-field-err" id="co_mobile_err"></span>
+                    </div>
+                    <!-- House No -->
+                    <div>
+                        <label class="co-label" for="co_house">House / Flat No *</label>
+                        <input class="co-input" id="co_house" type="text" placeholder="Flat 4B, Block A"
+                            autocomplete="address-line1">
+                        <span class="co-field-err" id="co_house_err"></span>
+                    </div>
+                    <!-- Street -->
+                    <div>
+                        <label class="co-label" for="co_street">Street Address *</label>
+                        <input class="co-input" id="co_street" type="text" placeholder="MG Road, Banjara Hills"
+                            autocomplete="address-line2">
+                        <span class="co-field-err" id="co_street_err"></span>
+                    </div>
+                    <!-- City -->
+                    <div>
+                        <label class="co-label" for="co_city">City *</label>
+                        <input class="co-input" id="co_city" type="text" placeholder="Hyderabad"
+                            autocomplete="address-level2">
+                        <span class="co-field-err" id="co_city_err"></span>
+                    </div>
+                    <!-- State -->
+                    <div>
+                        <label class="co-label" for="co_state">State *</label>
+                        <input class="co-input" id="co_state" type="text" placeholder="Telangana"
+                            autocomplete="address-level1">
+                        <span class="co-field-err" id="co_state_err"></span>
+                    </div>
+                    <!-- Pincode -->
+                    <div>
+                        <label class="co-label" for="co_pincode">Pincode *</label>
+                        <input class="co-input" id="co_pincode" type="text" placeholder="500001" maxlength="10"
+                            autocomplete="postal-code">
+                        <span class="co-field-err" id="co_pincode_err"></span>
+                    </div>
+                    <!-- Payment Method -->
+                    <div class="co-full">
+                        <label class="co-label" for="co_payment">Payment Method *</label>
+                        <select class="co-input" id="co_payment" autocomplete="off">
+                            <option value="">Select payment method</option>
+                            <option value="COD">Cash on Delivery (COD)</option>
+                            <option value="UPI">UPI</option>
+                            <option value="Card">Credit / Debit Card</option>
+                            <option value="NetBanking">Net Banking</option>
+                        </select>
+                        <span class="co-field-err" id="co_payment_err"></span>
+                    </div>
+                </div>
+
+                <!-- Cart Summary -->
+                <div class="co-summary" id="co_cartSummary"></div>
+
+                <button type="submit" class="co-place-btn" id="placeOrderBtn">
+                    <img src="images/gymbro-logo.jpg" alt=""
+                        style="width:20px;height:20px;border-radius:50%;object-fit:cover;">
+                    Place Order
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar gymbro-navbar" aria-label="Primary">
+        <div class="nav-container gymbro-navbar__inner">
+            <a href="#" class="nav-logo gymbro-navbar__brand"
+                onclick="closeGymbroMenu(); window.scrollTo({ top: 0, behavior: 'smooth' }); return false;">
+                <img src="images/gymbro.png" alt="GymBro">
+            </a>
+
+            <button class="gymbro-navbar__toggle" type="button" id="gymbroNavToggle" aria-controls="gymbroNavMenu"
+                aria-expanded="false" aria-label="Toggle navigation" onclick="toggleGymbroMenu()">
+                <span class="gymbro-navbar__toggle-line"></span>
+                <span class="gymbro-navbar__toggle-line"></span>
+                <span class="gymbro-navbar__toggle-line"></span>
+            </button>
+
+            <div class="gymbro-navbar__menu" id="gymbroNavMenu">
+                <a href="#" class="gymbro-navbar__link"
+                    onclick="closeGymbroMenu(); window.scrollTo({ top: 0, behavior: 'smooth' }); return false;">Home</a>
+                <a href="#products" class="gymbro-navbar__link" data-gymbro-target="products">Shop</a>
+                <a href="#collections" class="gymbro-navbar__link" data-gymbro-target="collections">Collections</a>
+                <a href="#products" class="gymbro-navbar__link" data-gymbro-target="products">Products</a>
+                <button class="cart-icon gymbro-navbar__cart" type="button" onclick="toggleCart()">
+                    <span>Cart</span>
+                    <span class="cart-count gymbro-navbar__cart-count" id="cartCount">0</span>
+                </button>
+                <a href="reviews.html" class="gymbro-navbar__link" onclick="closeGymbroMenu()">Reviews</a>
+                <a href="https://wa.me/918978422691" class="gymbro-navbar__link gymbro-navbar__link--cta"
+                    target="_blank" rel="noopener noreferrer" onclick="closeGymbroMenu()">Contact Us</a>
+
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-text">
+                <p class="hero-tag"
+                    style="display:block!important;visibility:visible!important;opacity:1!important;color:#d4af70!important;-webkit-text-fill-color:#d4af70!important;background:none!important;font-size:0.85rem;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;margin-bottom:1rem;text-shadow:0 0 16px rgba(212,175,112,0.6);">
+                    PREMIUM GYMWEAR • EST. 2024</p>
+                <h1 class="hero-heading">
+                    BUILT <span class="hero-highlight">FOR</span>
+                    <span class="grind">THE GRIND</span>
+                </h1>
+                <p class="hero-subtext">Engineered for performance. Designed for relentless.<br><span>Wear your
+                        discipline.</span>
+                </p>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary" onclick="scrollToSection('collections')">SHOP NOW →</button>
+                    <button class="btn btn-secondary" onclick="scrollToSection('products')">EXPLORE COLLECTION</button>
+                </div>
+            </div>
+            <div class="hero-video">
+                <video class="hero-dumbbell" autoplay muted loop playsinline preload="auto">
+                    <source src="assets/gymbro-video.mp4" type="video/mp4">
+                </video>
+            </div>
+        </div>
+    </section>
+
+    <!-- COLLECTIONS -->
+    <section id="collections" class="collections">
+        <h2 style="text-align: center; font-size: 48px; margin-bottom: 40px;">COLLECTIONS</h2>
+        <div class="collections-grid" id="collectionsGrid">
+            <div class="collection-card filter-btn active" data-filter="all"
+                style="background-image: url('images/gymbro-logo.jpg'); background-size: cover; background-repeat: no-repeat; background-position: center;">
+                <div class="collection-title">ALL</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PRODUCTS -->
+    <section id="products" class="products">
+        <h2 style="text-align: center; font-size: 48px; margin-bottom: 20px;">PRODUCTS</h2>
+
+        <!-- Filter Buttons -->
+        <div class="filter-container filter-container--with-sort"
+            style="display: flex; gap: 12px; overflow-x: auto; padding: 20px 0; margin-bottom: 40px; scrollbar-width: none; -ms-overflow-style: none; align-items: center;">
+            <div id="categoryFilterButtons" style="display: flex; gap: 12px; align-items: center; flex-wrap: nowrap;">
+                <button class="filter-btn active" data-filter="all" data-category="all">All</button>
+                <button class="filter-btn" data-filter="hoodies" data-category="hoodies">Hoodies</button>
+                <button class="filter-btn" data-filter="oversized" data-category="oversized">Oversized Tees</button>
+                <button class="filter-btn" data-filter="trackpants" data-category="trackpants">Track Pants</button>
+                <button class="filter-btn" data-filter="accessories" data-category="accessories">Accessories</button>
+            </div>
+
+            <div class="sort-pill" style="margin-left: auto; flex-shrink: 0;">
+                <label for="sortDropdown" class="sort-pill__label">Sort By</label>
+                <div class="sort-pill__control">
+                    <select id="sortDropdown" class="sort-select" aria-label="Sort By">
+                        <option value="price-desc">Price: High to Low</option>
+                        <option value="price-asc">Price: Low to High</option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down sort-pill__icon" aria-hidden="true"></i>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="product-grid" id="productsGrid">
+            <div class="product-card" style="cursor: default;">
+                <div class="product-image"
+                    style="height: 280px; display:flex; align-items:center; justify-content:center;">
+                    <span style="color:#ccc; font-weight:600;">Loading products...</span>
+                </div>
+                <div class="product-info">
+                    <span class="category-label" style="opacity:0;">LOADING</span>
+                    <h3 class="product-name" style="opacity:0;">&nbsp;</h3>
+                    <div class="price" style="opacity:0;">&nbsp;</div>
+                    <button class="btn-cart" style="opacity:0; pointer-events:none;">ADD TO CART</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- OUR STORY - PREMIUM DARK SECTION -->
+    <section class="story" id="story">
+        <div class="story-container">
+            <div class="story-media story-reveal">
+                <img src="images/hard-gym.jpg" alt="Intense deadlift workout in a premium gym" class="story-image">
+            </div>
+            <div class="story-content story-reveal">
+                <span class="story-tag">OUR STORY</span>
+                <h2 class="story-title">Forged in Iron</h2>
+                <p class="story-description">GYMBRO was born from the iron. The gym is more than a place—it’s a proving
+                    ground where every rep, every set, every grind shapes who you become.</p>
+                <p class="story-description">Built on strength, discipline, and brotherhood, we create premium gymwear
+                    that moves with you, supports peak performance, and commands respect.</p>
+                <a href="#products" class="story-cta" onclick="scrollToSection('products'); return false;">Explore
+                    Collection <span>→</span></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- JOIN BROTHERHOOD -->
+    <section class="subscribe">
+        <h2>Join the Bro Squad</h2>
+        <p>Stay updated with drops & motivation</p>
+        <form class="subscribe-form" id="subscribeForm">
+            <input type="email" id="subscribeEmail" class="subscribe-input" placeholder="Enter your email" required>
+            <button type="submit" class="subscribe-btn"><img src="images/gymbro-logo.jpg" alt="GymBro"
+                    style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;">JOIN NOW</button>
+        </form>
+        <div id="subscribeSuccess" class="subscribe-success"
+            style="display: none; margin-top: 20px; padding: 16px; background: rgba(255, 71, 87, 0.15); border: 1px solid rgba(255, 71, 87, 0.3); border-radius: 12px; color: #ff4757; font-weight: 600; opacity: 0; transform: translateY(10px); transition: all 0.4s ease;">
+            <i class="fas fa-check-circle" style="margin-right: 8px;"></i>
+            Welcome to the Bro Squad! 💪
+        </div>
+        <div style="margin-top: 30px;">
+            <a href="https://wa.me/918978422691" style="color: #25D366; margin: 0 15px; font-size: 24px;"><i
+                    class="fab fa-whatsapp"></i></a>
+            <a href="https://www.instagram.com/gymbrosupport05/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" style="color: #E4405F; margin: 0 15px; font-size: 24px;"><i
+                    class="fab fa-instagram"></i></a>
+        </div>
+    </section>
+
+    <!-- REVIEWS -->
+    <section class="subscribe" style="padding-top: 60px;">
+        <h2>Reviews</h2>
+        <p style="margin-bottom: 20px;">Drop your rating + thoughts about our gymwear.</p>
+        <a href="reviews.html" class="story-cta" style="display:inline-flex; justify-content:center;">
+            Write a Review <span style="margin-left: 6px;">→</span>
+        </a>
+    </section>
+
+    <!-- FAQs -->
+    <section class="faqs" style="padding: 60px 20px; text-align: center;">
+        <h2 style="margin-bottom: 40px;">Frequently Asked Questions</h2>
+        <div style="max-width: 700px; margin: 0 auto; text-align: left;">
+            <div class="faq__item" style="border-bottom: 1px solid #333; padding: 15px 0;">
+                <button class="faq__question"
+                    style="background:none; border:none; color:#fff; font-size:1rem; font-weight:600; cursor:pointer; width:100%; display:flex; justify-content:space-between; align-items:center;"
+                    aria-expanded="false" aria-controls="faq-1">
+                    What makes GYMBRO gymwear premium?
+                    <span class="faq__icon" style="font-size:1.2rem; color:#ffd166;">+</span>
+                </button>
+                <div id="faq-1" hidden style="color:#ccc; margin-top:10px; line-height:1.7;">
+                    Our gymwear is designed with high-quality materials focused on comfort, durability, and performance.
+                </div>
+            </div>
+            <div class="faq__item" style="border-bottom: 1px solid #333; padding: 15px 0;">
+                <button class="faq__question"
+                    style="background:none; border:none; color:#fff; font-size:1rem; font-weight:600; cursor:pointer; width:100%; display:flex; justify-content:space-between; align-items:center;"
+                    aria-expanded="false" aria-controls="faq-2">
+                    Is the fabric stretchable and sweat-resistant?
+                    <span class="faq__icon" style="font-size:1.2rem; color:#ffd166;">+</span>
+                </button>
+                <div id="faq-2" hidden style="color:#ccc; margin-top:10px; line-height:1.7;">
+                    Yes, our products are made with breathable, stretchable, and sweat-resistant fabric for intense
+                    workouts.
+                </div>
+            </div>
+            <div class="faq__item" style="border-bottom: 1px solid #333; padding: 15px 0;">
+                <button class="faq__question"
+                    style="background:none; border:none; color:#fff; font-size:1rem; font-weight:600; cursor:pointer; width:100%; display:flex; justify-content:space-between; align-items:center;"
+                    aria-expanded="false" aria-controls="faq-3">
+                    How do I choose the right size?
+                    <span class="faq__icon" style="font-size:1.2rem; color:#ffd166;">+</span>
+                </button>
+                <div id="faq-3" hidden style="color:#ccc; margin-top:10px; line-height:1.7;">
+                    You can use our size guide available on each product page for the perfect fit.
+                </div>
+            </div>
+            <div class="faq__item" style="border-bottom: 1px solid #333; padding: 15px 0;">
+                <button class="faq__question"
+                    style="background:none; border:none; color:#fff; font-size:1rem; font-weight:600; cursor:pointer; width:100%; display:flex; justify-content:space-between; align-items:center;"
+                    aria-expanded="false" aria-controls="faq-4">
+                    How long does shipping take?
+                    <span class="faq__icon" style="font-size:1.2rem; color:#ffd166;">+</span>
+                </button>
+                <div id="faq-4" hidden style="color:#ccc; margin-top:10px; line-height:1.7;">
+                    Orders are usually delivered within 3–7 business days depending on your location.
+                </div>
+            </div>
+            <div class="faq__item" style="border-bottom: 1px solid #333; padding: 15px 0;">
+                <button class="faq__question"
+                    style="background:none; border:none; color:#fff; font-size:1rem; font-weight:600; cursor:pointer; width:100%; display:flex; justify-content:space-between; align-items:center;"
+                    aria-expanded="false" aria-controls="faq-5">
+                    Do you offer returns or exchanges?
+                    <span class="faq__icon" style="font-size:1.2rem; color:#ffd166;">+</span>
+                </button>
+                <div id="faq-5" hidden style="color:#ccc; margin-top:10px; line-height:1.7;">
+                    Yes, we offer easy returns and exchanges for eligible products within the return period.
+                </div>
+            </div>
+            <div class="faq__item" style="border-bottom: 1px solid #333; padding: 15px 0;">
+                <button class="faq__question"
+                    style="background:none; border:none; color:#fff; font-size:1rem; font-weight:600; cursor:pointer; width:100%; display:flex; justify-content:space-between; align-items:center;"
+                    aria-expanded="false" aria-controls="faq-6">
+                    Can I wear these outfits casually too?
+                    <span class="faq__icon" style="font-size:1.2rem; color:#ffd166;">+</span>
+                </button>
+                <div id="faq-6" hidden style="color:#ccc; margin-top:10px; line-height:1.7;">
+                    Absolutely. Our designs are made for both gym performance and everyday streetwear style.
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <script src="js/script.js"></script>
+
+    <script>
+        // FAQ accordion (no external dependencies)
+        document.addEventListener('DOMContentLoaded', () => {
+            const faqSection = document.querySelector('.faqs');
+            if (!faqSection) return;
+
+            const buttons = faqSection.querySelectorAll('.faq__question');
+
+            buttons.forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const targetId = btn.getAttribute('aria-controls');
+                    const panel = targetId ? document.getElementById(targetId) : null;
+                    if (!panel) return;
+
+                    const isHidden = panel.hasAttribute('hidden');
+
+                    // Close all panels within this section (classic accordion behavior)
+                    buttons.forEach((otherBtn) => {
+                        const otherTargetId = otherBtn.getAttribute('aria-controls');
+                        const otherPanel = otherTargetId ? document.getElementById(otherTargetId) : null;
+                        if (!otherPanel) return;
+
+                        if (!otherPanel.hasAttribute('hidden')) {
+                            otherPanel.setAttribute('hidden', '');
+                            otherBtn.setAttribute('aria-expanded', 'false');
+                            const icon = otherBtn.querySelector('.faq__icon');
+                            if (icon) icon.textContent = '+';
+                        }
+                    });
+
+                    if (isHidden) {
+                        panel.removeAttribute('hidden');
+                        btn.setAttribute('aria-expanded', 'true');
+                        const icon = btn.querySelector('.faq__icon');
+                        if (icon) icon.textContent = '−';
+                    } else {
+                        panel.setAttribute('hidden', '');
+                        btn.setAttribute('aria-expanded', 'false');
+                        const icon = btn.querySelector('.faq__icon');
+                        if (icon) icon.textContent = '+';
+                    }
+                });
+            });
+        });
+
+    </script>
+
+
+    <script>
+        // Close menu when clicking any nav link
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('#gymbroNavMenu .gymbro-navbar__link').forEach(function (link) {
+                link.addEventListener('click', closeGymbroMenu);
+            });
+        });
+
+        // Subscribe + navbar/cart UI is handled here.
+        // Collections ↔ Products sync and filtering is handled exclusively in js/script.js.
+        document.addEventListener('DOMContentLoaded', function () {
+            // Subscribe form handler
+            const subscribeForm = document.getElementById('subscribeForm');
+            const subscribeEmail = document.getElementById('subscribeEmail');
+            const subscribeSuccess = document.getElementById('subscribeSuccess');
+
+            if (subscribeForm && subscribeEmail && subscribeSuccess) {
+                subscribeForm.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+                    const email = subscribeEmail.value.trim();
+                    if (!email) return;
+
+                    // Email format validation (standard RFC 5322 regex)
+                    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                    if (!emailRegex.test(email)) {
+                        alert("Please enter a valid email address.");
+                        return;
+                    }
+
+                    // Disable button to prevent double submits & indicate loading
+                    const btn = subscribeForm.querySelector('.subscribe-btn');
+                    const originalBtnHTML = btn.innerHTML;
+                    btn.disabled = true;
+                    btn.innerHTML = `<i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i>JOINING...`;
+
+                    // Wait if database layer is still initializing
+                    if (typeof window.dbAddSubscriber !== 'function') {
+                        setTimeout(() => btn.click(), 100);
+                        return;
+                    }
+
+                    try {
+                        await window.dbAddSubscriber(email);
+
+                        // Success block
+                        subscribeSuccess.innerHTML = '<i class="fas fa-check-circle" style="margin-right: 8px;"></i>Welcome to the Bro Squad! 💪';
+                        subscribeSuccess.style.background = "rgba(46, 213, 115, 0.15)";
+                        subscribeSuccess.style.borderColor = "rgba(46, 213, 115, 0.3)";
+                        subscribeSuccess.style.color = "#2ed573";
+                        subscribeSuccess.style.display = 'block';
+                        subscribeSuccess.style.opacity = '1';
+                        subscribeSuccess.style.transform = 'translateY(0)';
+                        subscribeForm.reset();
+
+                        setTimeout(() => {
+                            subscribeSuccess.style.opacity = '0';
+                            subscribeSuccess.style.transform = 'translateY(10px)';
+                            setTimeout(() => subscribeSuccess.style.display = 'none', 400);
+                        }, 4000);
+                    } catch (err) {
+                        console.error("Subscription failed:", err);
+
+                        // Error block (styled red like accent)
+                        subscribeSuccess.innerHTML = `<i class="fas fa-exclamation-circle" style="margin-right: 8px;"></i>${err.message || "Subscription failed. Please try again."}`;
+                        subscribeSuccess.style.background = "rgba(255, 71, 87, 0.15)";
+                        subscribeSuccess.style.borderColor = "rgba(255, 71, 87, 0.3)";
+                        subscribeSuccess.style.color = "#ff4757";
+                        subscribeSuccess.style.display = 'block';
+                        subscribeSuccess.style.opacity = '1';
+                        subscribeSuccess.style.transform = 'translateY(0)';
+
+                        setTimeout(() => {
+                            subscribeSuccess.style.opacity = '0';
+                            subscribeSuccess.style.transform = 'translateY(10px)';
+                            setTimeout(() => subscribeSuccess.style.display = 'none', 400);
+                        }, 4000);
+                    } finally {
+                        // Re-enable button
+                        btn.disabled = false;
+                        btn.innerHTML = originalBtnHTML;
+                    }
+                });
+            }
+        });
+
+        // Keep a single scroll function available for inline onclick handlers in markup.
+        // Note: Premium smooth scrolling required by category filtering.
+        function scrollToSection(sectionId) {
+            const element = document.getElementById(sectionId);
+            if (!element) return;
+
+            element.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+    </script>
+    <script src="js/script.js"></script>
+</body>
+
+
+</html>
