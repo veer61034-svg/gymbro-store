@@ -542,7 +542,7 @@
                                     <th>City</th>
                                     <th>State</th>
                                     <th>Pincode</th>
-                                    <th>Items</th>
+                                    <th>Items &amp; Sizes</th>
                                     <th>Total</th>
                                     <th>Payment</th>
                                     <th>Date</th>
@@ -1416,6 +1416,14 @@
                     const id = escAttr(order.id);
                     const status = order.status || 'pending';
 
+                    // Build items + sizes cell
+                    const itemsHTML = (order.items || []).map(item => {
+                        const sizeBadge = item.size
+                            ? `<span style="display:inline-block;background:rgba(255,71,87,0.18);color:#ff4757;border:1px solid rgba(255,71,87,0.35);border-radius:5px;font-size:10px;font-weight:700;padding:1px 6px;margin-left:4px;vertical-align:middle;">${escAttr(item.size)}</span>`
+                            : '';
+                        return `<div style="white-space:nowrap;margin-bottom:2px;">${escAttr(item.quantity)}× ${escAttr(item.name)}${sizeBadge}</div>`;
+                    }).join('');
+
                     return `
                     <tr>
                         <td>${escAttr(order.id)}</td>
@@ -1427,7 +1435,7 @@
                         <td>${escAttr(order.city || '')}</td>
                         <td>${escAttr(order.state || '')}</td>
                         <td>${escAttr(order.pincode || '')}</td>
-                        <td>${escAttr(order.totalItems)}</td>
+                        <td style="min-width:160px;">${itemsHTML || '—'}</td>
                         <td>₹${Number(order.total || 0).toLocaleString()}</td>
                         <td>${escAttr(order.paymentMethod || 'Unknown')}</td>
                         <td>${escAttr(order.date)}</td>
@@ -1440,7 +1448,7 @@
                             </select>
                         </td>
                         <td>
-                            <button class="action-btn download-single-btn" onclick="downloadSingleOrder('${id}')" title="Download order summary">
+                            <button class="action-btn download-single-btn" onclick="downloadSingleOrder('${id}')" title="Download order (.txt)">
                                 <i class="fas fa-file-download"></i>
                             </button>
                             <button class="action-btn delete-btn" onclick="deleteOrder('${id}')" title="Delete order">
@@ -1521,8 +1529,12 @@
                     return;
                 }
 
+                // Build items list with size per item
                 const itemsText = (order.items || [])
-                    .map(i => `${i.quantity}x ${i.name} (₹${Math.round(i.price)} each)`)
+                    .map(i => {
+                        const sizePart = i.size ? ` — Size: ${i.size}` : '';
+                        return `  ${i.quantity}x ${i.name}${sizePart}  (₹${Math.round(i.price)} each  →  ₹${Math.round((i.price || 0) * (i.quantity || 0))} total)`;
+                    })
                     .join('\n');
 
                 const content = `==================================================
@@ -1627,7 +1639,10 @@ Thank you for shopping with GYMBRO!
 
                     const rows = listToExport.map(order => {
                         const itemsText = (order.items || [])
-                            .map(i => `${i.quantity}x ${i.name}`)
+                            .map(i => {
+                                const sizePart = i.size ? ` [${i.size}]` : '';
+                                return `${i.quantity}x ${i.name}${sizePart}`;
+                            })
                             .join('; ');
 
                         return [
