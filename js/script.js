@@ -207,10 +207,17 @@ function addToCart(name, price, event) {
     }
 
     updateCart();
+
+    // Visual feedback: button press animation
     if (event) {
-        event.target.style.transform = 'scale(0.95)';
-        setTimeout(() => event.target.style.transform = '', 150);
+        const btn = event.target.closest('.btn-cart') || event.target;
+        btn.style.transform = 'scale(0.95)';
+        setTimeout(() => btn.style.transform = '', 150);
     }
+
+    // Toast confirmation so user knows it worked (especially important on mobile)
+    const totalItems = cart.reduce((s, i) => s + i.quantity, 0);
+    showToast('✓ ' + name + ' added to cart! (' + totalItems + ' item' + (totalItems > 1 ? 's' : '') + ')', 'success');
 }
 
 

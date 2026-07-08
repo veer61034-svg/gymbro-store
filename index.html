@@ -1123,7 +1123,6 @@
             display: none;
             width: 48px;
             height: 48px;
-            margin-left: auto;
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 14px;
             background: rgba(255, 255, 255, 0.04);
@@ -1166,6 +1165,7 @@
             align-items: center;
             gap: 1rem;
             margin-left: auto;
+            order: 2; /* Desktop: logo(auto) → menu(2) → cart(3) */
         }
 
         .gymbro-navbar__link,
@@ -1203,6 +1203,7 @@
         .gymbro-navbar__cart {
             position: relative;
             border-color: rgba(255, 255, 255, 0.12);
+            order: 3; /* Desktop: appear after the nav menu */
         }
 
         .gymbro-navbar__cart .gymbro-navbar__cart-count {
@@ -1268,10 +1269,29 @@
                 animation: gymbroNavFade 0.28s ease;
             }
 
-            .gymbro-navbar__link,
-            .gymbro-navbar__cart {
+            .gymbro-navbar__link {
                 width: 100%;
                 justify-content: space-between;
+            }
+
+            /* Cart icon is now OUTSIDE the menu — keep it compact next to hamburger */
+            .gymbro-navbar__cart {
+                order: 2; /* Mobile: between logo(1) and hamburger(3) */
+                width: auto;
+                margin-left: auto;
+                font-size: 1.15rem;
+                padding: 0.6rem 0.8rem;
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                background: rgba(255, 255, 255, 0.05);
+            }
+
+            .gymbro-navbar__toggle {
+                order: 3; /* Mobile: hamburger always last */
+                margin-left: 0;
+            }
+
+            .gymbro-navbar__menu {
+                order: 4; /* Mobile: dropdown menu goes below */
             }
 
             .filter-container {
@@ -1647,6 +1667,12 @@
                 <img src="images/gymbro.png" alt="GymBro">
             </a>
 
+            <!-- Cart icon OUTSIDE menu so it's always visible on mobile -->
+            <button class="cart-icon gymbro-navbar__cart" type="button" onclick="toggleCart()" aria-label="Open cart">
+                <i class="fas fa-shopping-bag"></i>
+                <span class="cart-count gymbro-navbar__cart-count" id="cartCount">0</span>
+            </button>
+
             <button class="gymbro-navbar__toggle" type="button" id="gymbroNavToggle" aria-controls="gymbroNavMenu"
                 aria-expanded="false" aria-label="Toggle navigation" onclick="toggleGymbroMenu()">
                 <span class="gymbro-navbar__toggle-line"></span>
@@ -1660,10 +1686,6 @@
                 <a href="#products" class="gymbro-navbar__link" data-gymbro-target="products">Shop</a>
                 <a href="#collections" class="gymbro-navbar__link" data-gymbro-target="collections">Collections</a>
                 <a href="#products" class="gymbro-navbar__link" data-gymbro-target="products">Products</a>
-                <button class="cart-icon gymbro-navbar__cart" type="button" onclick="toggleCart()">
-                    <span>Cart</span>
-                    <span class="cart-count gymbro-navbar__cart-count" id="cartCount">0</span>
-                </button>
                 <a href="reviews.html" class="gymbro-navbar__link" onclick="closeGymbroMenu()">Reviews</a>
                 <a href="https://wa.me/918978422691" class="gymbro-navbar__link gymbro-navbar__link--cta"
                     target="_blank" rel="noopener noreferrer" onclick="closeGymbroMenu()">Contact Us</a>
