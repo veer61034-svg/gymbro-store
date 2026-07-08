@@ -646,6 +646,34 @@
                                 style="width:100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; font-family: inherit; font-size: 0.95rem; resize: vertical;"></textarea>
                         </div>
 
+                        <!-- Sizes -->
+                        <div style="margin-top: 1rem;">
+                            <label style="color: #aaa; font-size: 0.85rem; display: block; margin-bottom: 8px;">
+                                Available Sizes <span style="color:#666; font-weight:400;">(leave all unchecked = show all sizes)</span>
+                            </label>
+                            <div id="prodSizesGroup" style="display:flex; flex-wrap:wrap; gap:8px;">
+                                <label style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:5px 12px;cursor:pointer;color:#ccc;font-size:0.85rem;font-weight:600;">
+                                    <input type="checkbox" class="prod-size-check" value="XS" style="accent-color:#ff4757;"> XS
+                                </label>
+                                <label style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:5px 12px;cursor:pointer;color:#ccc;font-size:0.85rem;font-weight:600;">
+                                    <input type="checkbox" class="prod-size-check" value="S" style="accent-color:#ff4757;"> S
+                                </label>
+                                <label style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:5px 12px;cursor:pointer;color:#ccc;font-size:0.85rem;font-weight:600;">
+                                    <input type="checkbox" class="prod-size-check" value="M" style="accent-color:#ff4757;"> M
+                                </label>
+                                <label style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:5px 12px;cursor:pointer;color:#ccc;font-size:0.85rem;font-weight:600;">
+                                    <input type="checkbox" class="prod-size-check" value="L" style="accent-color:#ff4757;"> L
+                                </label>
+                                <label style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:5px 12px;cursor:pointer;color:#ccc;font-size:0.85rem;font-weight:600;">
+                                    <input type="checkbox" class="prod-size-check" value="XL" style="accent-color:#ff4757;"> XL
+                                </label>
+                                <label style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:5px 12px;cursor:pointer;color:#ccc;font-size:0.85rem;font-weight:600;">
+                                    <input type="checkbox" class="prod-size-check" value="XXL" style="accent-color:#ff4757;"> XXL
+                                </label>
+                            </div>
+                            <p style="color:#666; font-size:0.75rem; margin-top:5px;">Check only the sizes your product comes in. Leave all unchecked to show all sizes (XS–XXL).</p>
+                        </div>
+
                         <button type="submit" id="addProductBtn"
                             style="margin-top: 1.2rem; padding: 0.85rem 2rem; background: #ff4757; color: #fff; border: none; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.25s ease;">
                             <i class="fas fa-plus" style="margin-right: 8px;"></i>Add Product
@@ -1837,7 +1865,8 @@ Thank you for shopping with GYMBRO!
                     price: Number(document.getElementById('prodPrice').value),
                     stock: Number(document.getElementById('prodStock').value),
                     image: document.getElementById('prodImage').value.trim(),
-                    description: document.getElementById('prodDescription').value.trim() || ''
+                    description: document.getElementById('prodDescription').value.trim() || '',
+                    sizes: Array.from(document.querySelectorAll('.prod-size-check:checked')).map(cb => cb.value)
                 };
 
                 if (!productData.name || !productData.category || !productData.price || !productData.image) {
@@ -1907,6 +1936,11 @@ Thank you for shopping with GYMBRO!
                 document.getElementById('prodImage').value = product.image || '';
                 document.getElementById('prodDescription').value = product.description || '';
 
+                // Pre-fill sizes checkboxes
+                document.querySelectorAll('.prod-size-check').forEach(cb => {
+                    cb.checked = Array.isArray(product.sizes) && product.sizes.includes(cb.value);
+                });
+
                 // Trigger image preview
                 document.getElementById('prodImage').dispatchEvent(new Event('input'));
 
@@ -1926,6 +1960,8 @@ Thank you for shopping with GYMBRO!
                 document.getElementById('prodStock').value = 50;
                 document.getElementById('prodImagePreview').style.display = 'none';
                 setFormCategory('');
+                // Uncheck all size boxes
+                document.querySelectorAll('.prod-size-check').forEach(cb => cb.checked = false);
 
                 // Reset UI to add mode
                 document.getElementById('productFormTitle').innerHTML = '<i class="fas fa-plus-circle" style="color: #ff4757; margin-right: 8px;"></i>Add New Product';

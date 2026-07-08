@@ -1530,6 +1530,14 @@
             }
         }
 
+        @keyframes sizeShake {
+            0%, 100% { transform: translateX(0); }
+            20%       { transform: translateX(-6px); }
+            40%       { transform: translateX(6px); }
+            60%       { transform: translateX(-4px); }
+            80%       { transform: translateX(4px); }
+        }
+
         @media (max-width: 600px) {
             .co-modal-box {
                 padding: 1.25rem 1rem;

@@ -12,18 +12,45 @@ function formatINR(productPrice) {
 }
 
 
+// Categories that need size selection (clothing only)
+const SIZED_CATEGORIES = ['hoodies', 'oversized', 'trackpants', 'tshirts', 'shirts', 'jackets', 'shorts', 'leggings', 'joggers'];
+
+function needsSizes(category) {
+    const cat = (category || '').toLowerCase().trim();
+    // Skip accessories/supplements
+    if (cat === 'accessories' || cat === 'supplements' || cat === 'equipment') return false;
+    return true; // Default: show sizes for all clothing
+}
+
 function productCardHTML(p, index = 0) {
     const name = p?.name ?? 'Unnamed';
     const category = p?.category ?? 'uncategorized';
     const description = p?.description ?? '';
     const image = p?.image ?? '';
     const stock = typeof p?.stock === 'number' ? p.stock : 0;
-
     const priceINR = formatINR(p?.price);
-
     const badgeHTML = stock <= 0 ? `<span class="sale-badge" style="background:#333;">OUT OF STOCK</span>` : '';
 
-    const safeIndex = Number(index) || 0;
+    // Sizes — use product-defined sizes or default clothing sizes
+    const showSizes = needsSizes(category);
+    const sizes = Array.isArray(p?.sizes) && p.sizes.length > 0
+        ? p.sizes
+        : ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+
+    const sizeSelectorHTML = showSizes ? `
+        <div class="size-selector" style="margin-bottom:14px;">
+            <div style="font-size:11px; color:#aaa; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; font-weight:600;">Select Size</div>
+            <div class="size-btns" style="display:flex; flex-wrap:wrap; gap:6px;">
+                ${sizes.map(sz => `<button type="button" class="size-btn" data-size="${sz}" style="
+                    min-width:38px; padding:5px 8px; border-radius:8px;
+                    border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.04);
+                    color:#ccc; font-size:12px; font-weight:600; cursor:pointer;
+                    transition:all 0.2s ease; font-family:inherit;
+                ">${sz}</button>`).join('')}
+            </div>
+            <div class="size-error" style="display:none; color:#ff4757; font-size:12px; margin-top:6px;">⚠ Please select a size</div>
+        </div>
+    ` : '';
 
     return `
         <div class="product-card" data-category="${String(category)}" style="cursor: default;">
@@ -37,10 +64,12 @@ function productCardHTML(p, index = 0) {
                 <p style="color:#ccc; font-size:13px; line-height:1.6; margin-bottom:14px; min-height:42px;">
                     ${String(description).slice(0, 90)}
                 </p>
+                ${sizeSelectorHTML}
                 <button
                     class="btn-cart"
                     data-price="${String(p?.price ?? 0)}"
                     data-name="${String(name)}"
+                    data-needs-size="${showSizes}"
                     ${stock <= 0 ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}
                 >${stock <= 0 ? 'NOT AVAILABLE' : 'ADD TO CART'}</button>
             </div>
@@ -197,27 +226,21 @@ function renderProducts(products) {
 
 
 
-function addToCart(name, price, event) {
-    // Merge with existing cart item if the same product is already in the cart
-    const existing = cart.find(item => item.name === name);
+function addToCart(name, price, size) {
+    // Same product + same size = merge quantity; different size = separate entry
+    const existing = cart.find(item => item.name === name && item.size === (size || ''));
     if (existing) {
         existing.quantity += 1;
     } else {
-        cart.push({ name, price: price, quantity: 1 });
+        cart.push({ name, price: price, quantity: 1, size: size || '' });
     }
 
     updateCart();
 
-    // Visual feedback: button press animation
-    if (event) {
-        const btn = event.target.closest('.btn-cart') || event.target;
-        btn.style.transform = 'scale(0.95)';
-        setTimeout(() => btn.style.transform = '', 150);
-    }
-
-    // Toast confirmation so user knows it worked (especially important on mobile)
+    // Toast confirmation so user knows it worked (especially on mobile)
     const totalItems = cart.reduce((s, i) => s + i.quantity, 0);
-    showToast('✓ ' + name + ' added to cart! (' + totalItems + ' item' + (totalItems > 1 ? 's' : '') + ')', 'success');
+    const sizeLabel = size ? ` (Size: ${size})` : '';
+    showToast('✓ ' + name + sizeLabel + ' added to cart! (' + totalItems + ' item' + (totalItems > 1 ? 's' : '') + ')', 'success');
 }
 
 
@@ -243,7 +266,8 @@ function renderCart() {
     cartItems.innerHTML = cart.map((item, index) => `
         <div style="display: flex; gap: 15px; padding: 20px 0; border-bottom: 1px solid #333;">
             <div style="flex: 1;">
-                <h4 style="margin-bottom: 5px;">${item.name}</h4>
+                <h4 style="margin-bottom: 4px;">${item.name}</h4>
+                ${item.size ? `<span style="display:inline-block; background:rgba(255,71,87,0.15); color:#ff4757; border:1px solid rgba(255,71,87,0.3); border-radius:6px; font-size:11px; font-weight:700; padding:2px 8px; margin-bottom:6px;">SIZE: ${item.size}</span>` : ''}
                 <div style="font-size: 14px; color: #ccc; margin-bottom: 8px;">${item.quantity} × ₹${Math.round(item.price)}</div>
                 <p style="color: #ff4757; font-weight: 700; font-size: 18px;">₹${Math.round(item.price * item.quantity)} INR</p>
             </div>
@@ -333,7 +357,7 @@ function renderCheckoutSummary() {
     const total = Math.round(cart.reduce((s, i) => s + (i.price * i.quantity), 0));
     const itemsHTML = cart.map(i => `
         <div class="co-summary-row">
-            <span>${i.quantity}× ${String(i.name)}</span>
+            <span>${i.quantity}× ${String(i.name)}${i.size ? ` <span style="background:rgba(255,71,87,0.2);color:#ff4757;border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;margin-left:4px;">${i.size}</span>` : ''}</span>
             <span>₹${Math.round(i.price * i.quantity).toLocaleString()}</span>
         </div>
     `).join('');
@@ -367,7 +391,7 @@ async function submitCheckoutOrder(e) {
         city:           document.getElementById('co_city').value.trim(),
         state:          document.getElementById('co_state').value.trim(),
         pincode:        document.getElementById('co_pincode').value.trim(),
-        items:          cart.map(i => ({ name: i.name, price: i.price, quantity: i.quantity })),
+        items:          cart.map(i => ({ name: i.name, price: i.price, quantity: i.quantity, size: i.size || '' })),
         total:          Math.round(cart.reduce((s, i) => s + (i.price * i.quantity), 0)),
         totalItems:     cart.reduce((s, i) => s + i.quantity, 0),
         date:           new Date().toLocaleString('en-IN')
@@ -630,9 +654,45 @@ function filterAndScroll(category) {
 }
 
 
-// Delegated add-to-cart click handling (works for dynamically rendered buttons)
-// Prevent duplicate bindings by using a single document-level listener.
+// Delegated click handling for size buttons and add-to-cart
 document.addEventListener('click', function (e) {
+
+    // ── SIZE BUTTON click — single-select with toggle (click same = deselect) ──
+    const sizeBtn = e.target.closest('.size-btn');
+    if (sizeBtn) {
+        const sizeBtns = sizeBtn.closest('.size-btns');
+        if (!sizeBtns) return;
+
+        const isAlreadySelected = sizeBtn.classList.contains('size-btn--active');
+
+        // Always reset ALL buttons first
+        sizeBtns.querySelectorAll('.size-btn').forEach(function (b) {
+            b.style.background  = 'rgba(255,255,255,0.04)';
+            b.style.borderColor = 'rgba(255,255,255,0.2)';
+            b.style.color       = '#ccc';
+            b.style.transform   = '';
+            b.classList.remove('size-btn--active');
+        });
+
+        if (!isAlreadySelected) {
+            // SELECT the clicked size
+            sizeBtn.style.background  = 'rgba(255,71,87,0.2)';
+            sizeBtn.style.borderColor = '#ff4757';
+            sizeBtn.style.color       = '#ff4757';
+            sizeBtn.style.transform   = 'scale(1.08)';
+            sizeBtn.classList.add('size-btn--active');
+
+            // Hide "Please select a size." error
+            const errEl = sizeBtn.closest('.size-selector') &&
+                          sizeBtn.closest('.size-selector').querySelector('.size-error');
+            if (errEl) errEl.style.display = 'none';
+        }
+        // If isAlreadySelected → all buttons already reset above = deselected
+
+        return;
+    }
+
+    // ── ADD TO CART button click ──
     const btn = e.target.closest('.btn-cart');
     if (!btn) return;
     if (btn.disabled) return;
@@ -640,13 +700,48 @@ document.addEventListener('click', function (e) {
     const productInfo = btn.closest('.product-info');
     if (!productInfo) return;
 
-    const name = btn.dataset.name;
-    const rawPrice = btn.dataset.price;
+    const name      = btn.dataset.name;
+    const rawPrice  = btn.dataset.price;
+    const needsSize = btn.dataset.needsSize === 'true';
+    const price     = Number(rawPrice);
 
-    const price = Number(rawPrice);
     if (!name || Number.isNaN(price)) return;
 
-    addToCart(name, price, e);
+    // Read the ONE selected size
+    const activeSizeBtn = productInfo.querySelector('.size-btn--active');
+    const selectedSize  = activeSizeBtn ? activeSizeBtn.dataset.size : '';
+
+    // Validate — size is mandatory for clothing products
+    if (needsSize && !selectedSize) {
+        const errEl = productInfo.querySelector('.size-error');
+        if (errEl) {
+            errEl.textContent    = 'Please select a size.';
+            errEl.style.display  = 'block';
+        }
+        const sizeSelector = productInfo.querySelector('.size-selector');
+        if (sizeSelector) {
+            sizeSelector.style.animation = 'none';
+            sizeSelector.offsetHeight;                          // force reflow for animation restart
+            sizeSelector.style.animation = 'sizeShake 0.4s ease';
+        }
+        return;
+    }
+
+    // Button press animation
+    btn.style.transform = 'scale(0.95)';
+    setTimeout(function () { btn.style.transform = ''; }, 150);
+
+    // Add to cart (with or without size)
+    addToCart(name, price, selectedSize);
+
+    // Reset size selection on this card after successful add
+    if (activeSizeBtn) {
+        activeSizeBtn.style.background  = 'rgba(255,255,255,0.04)';
+        activeSizeBtn.style.borderColor = 'rgba(255,255,255,0.2)';
+        activeSizeBtn.style.color       = '#ccc';
+        activeSizeBtn.style.transform   = '';
+        activeSizeBtn.classList.remove('size-btn--active');
+    }
 });
 
 // Navbar scroll effect — darken navbar when user scrolls past the hero
