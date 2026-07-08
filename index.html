@@ -10,12 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=2">
-    <link rel="stylesheet" href="css/collections.css?v=2">
+    <link rel="stylesheet" href="css/style.css?v=3">
+    <link rel="stylesheet" href="css/collections.css?v=3">
 
     <!-- FIREBASE SERVERLESS CONFIG & DB LAYERS -->
-    <script type="module" src="js/firebase-config.js?v=2"></script>
-    <script type="module" src="js/firebase-db.js?v=2"></script>
+    <script type="module" src="js/firebase-config.js?v=3"></script>
+    <script type="module" src="js/firebase-db.js?v=3"></script>
 
     <!-- NAV TOGGLE: defined here in <head> so onclick works the instant button is tapped -->
     <script>
@@ -1722,12 +1722,34 @@
                 </div>
             </div>
             <div class="hero-video">
-                <video class="hero-dumbbell" autoplay muted loop playsinline preload="auto">
+                <video class="hero-dumbbell" autoplay muted loop playsinline webkit-playsinline preload="auto">
                     <source src="assets/gymbro-video.mp4" type="video/mp4">
                 </video>
             </div>
         </div>
     </section>
+
+    <script>
+        // Safari / iPhone autoplay fix — muted + playsinline + programmatic play() with retry
+        (function () {
+            function tryPlay() {
+                var vid = document.querySelector('.hero-dumbbell');
+                if (!vid) return;
+                vid.muted = true;              // enforce muted (Safari strict requirement)
+                vid.play().catch(function () {
+                    // First attempt blocked — retry once after 400 ms
+                    setTimeout(function () {
+                        vid.play().catch(function () {});
+                    }, 400);
+                });
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', tryPlay);
+            } else {
+                tryPlay();                     // DOM already ready
+            }
+        })();
+    </script>
 
     <!-- COLLECTIONS -->
     <section id="collections" class="collections">
@@ -2052,7 +2074,7 @@
             element.scrollIntoView({ behavior: "smooth", block: "start" });
         }
     </script>
-    <script src="js/script.js?v=2"></script>
+    <script src="js/script.js?v=3"></script>
 </body>
 
 
